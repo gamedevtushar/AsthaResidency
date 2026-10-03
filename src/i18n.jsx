@@ -107,7 +107,7 @@ const en = {
   'mo.pending': 'Pending', 'mo.paidOf': '{a}/{b} paid', 'mo.flatsLeft': '{n} yet to pay', 'mo.balance': 'Month balance',
   'mo.balanceSub': 'Collected + income − expenses', 'mo.maintenance': 'Maintenance', 'mo.entries': 'Income & expenses',
   'mo.noUnits': 'No flats or shops added yet', 'mo.notDue': 'Not due',
-  'mo.floor': 'Floor {n}', 'mo.others': 'Others',
+  'mo.floor': 'Floor {n}', 'mo.others': 'Others', 'mo.viewTiles': 'Tiles', 'mo.viewList': 'List',
   'a.forMonth': 'For which month', 'a.dateNote': 'Date (only for the record)', 'm.paidOnNote': 'Paid on (only for the record)',
   'r.monthNote': "Every amount is counted in the month it is for — October's maintenance paid in November shows under October.",
   // maintenance
@@ -240,7 +240,7 @@ const gu = {
   'mo.pending': 'બાકી', 'mo.paidOf': '{a}/{b} ભર્યા', 'mo.flatsLeft': '{n} ભરવાના બાકી', 'mo.balance': 'મહિનાનું બેલેન્સ',
   'mo.balanceSub': 'જમા + આવક − ખર્ચ', 'mo.maintenance': 'મેન્ટેનન્સ', 'mo.entries': 'આવક અને ખર્ચ',
   'mo.noUnits': 'હજુ કોઈ ફ્લેટ કે દુકાન ઉમેરી નથી', 'mo.notDue': 'લાગુ નથી',
-  'mo.floor': 'માળ {n}', 'mo.others': 'અન્ય',
+  'mo.floor': 'માળ {n}', 'mo.others': 'અન્ય', 'mo.viewTiles': 'ટાઇલ', 'mo.viewList': 'યાદી',
   'a.forMonth': 'કયા મહિનાનું', 'a.dateNote': 'તારીખ (ફક્ત નોંધ માટે)', 'm.paidOnNote': 'ભર્યાની તારીખ (ફક્ત નોંધ માટે)',
   'r.monthNote': 'દરેક રકમ જે મહિનાની છે તે મહિનામાં ગણાય છે — નવેમ્બરમાં ભરેલું ઓક્ટોબરનું મેન્ટેનન્સ ઓક્ટોબરમાં દેખાશે.',
   'm.units': '{n} યુનિટ',
