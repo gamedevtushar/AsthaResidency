@@ -1,0 +1,74 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Filled in at deploy time from SUPER_ADMIN_EMAIL in your local .env (npm run deploy:rules). Never commit the real value.
+    function superAdminEmail() { return '__SUPER_ADMIN_EMAIL__'; }
+
+    function signedIn() { return request.auth != null; }
+    function me() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function hasProfile() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function role() { return me().role; }
+
+    function isApproved() { return hasProfile() && role() in ['super_admin', 'wing_admin', 'viewer']; }
+    function isSuper() { return hasProfile() && role() == 'super_admin'; }
+    function isWingAdminOf(wingId) {
+      return hasProfile() && role() == 'wing_admin' && me().wingId != '' && me().wingId == wingId;
+    }
+
+    // Create: new doc must belong to caller's wing. Update: old and new doc both in caller's wing.
+    function canCreateWingData() { return isSuper() || isWingAdminOf(request.resource.data.wingId); }
+    function canUpdateWingData() {
+      return isSuper() || (isWingAdminOf(resource.data.wingId) && isWingAdminOf(request.resource.data.wingId));
+    }
+    function canDeleteWingData() { return isSuper() || isWingAdminOf(resource.data.wingId); }
+
+    match /users/{uid} {
+      allow read: if (signedIn() && request.auth.uid == uid) || isSuper();
+      // Main Admin creates all user profiles. Bootstrap: the configured email may create its own Main Admin profile.
+      allow create: if isSuper() || (
+        signedIn() && request.auth.uid == uid
+        && request.resource.data.role == 'super_admin'
+        && request.auth.token.email == superAdminEmail()
+      );
+      allow update, delete: if isSuper();
+    }
+
+    // ---- Public, view-only data: anyone with the link can read; only admins can write ----
+    match /wings/{id} {
+      allow read: if true;
+      allow write: if isSuper();
+    }
+
+    match /units/{id} {
+      allow read: if true;
+      allow create: if canCreateWingData();
+      allow update: if canUpdateWingData();
+      allow delete: if canDeleteWingData();
+    }
+
+    match /dues/{id} {
+      allow read: if true;
+      allow create: if canCreateWingData();
+      allow update: if canUpdateWingData();
+      allow delete: if canDeleteWingData();
+    }
+
+    // wingId == '' means common building income/expense → only Main Admin can write it
+    match /transactions/{id} {
+      allow read: if true;
+      allow create: if canCreateWingData();
+      allow update: if canUpdateWingData();
+      allow delete: if canDeleteWingData();
+    }
+
+    // ---- Private: residents' phone numbers, only for logged-in users ----
+    match /unitContacts/{unitId} {
+      allow read: if isApproved();
+      allow create: if canCreateWingData();
+      allow update: if canUpdateWingData();
+      allow delete: if canDeleteWingData();
+    }
+  }
+}

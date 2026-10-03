@@ -1,0 +1,27 @@
+{
+  "name": "astha-residency-maintenance",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "demo": "vite --config vite.demo.config.js",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy:rules": "node scripts/build-rules.mjs && firebase deploy --only firestore"
+  },
+  "dependencies": {
+    "firebase": "^12.19.0",
+    "lucide-react": "^1.50.0",
+    "motion": "^14.0.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.2"
+  }
+}

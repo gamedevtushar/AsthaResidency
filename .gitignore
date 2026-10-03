@@ -1,0 +1,22 @@
+node_modules
+dist
+*.log
+
+# ---- Secrets & local settings: never commit ----
+.env
+.env.*
+!.env.example
+*.secret.*
+.firebaserc
+firestore.generated.rules
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+*.local
+
+# ---- Local tools / OS ----
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

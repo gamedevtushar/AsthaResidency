@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+/* Theme colours are CSS variables, so one class works in both light and dark mode.
+   Use text-fg / text-muted / text-subtle for text, bg-fg/5 style tints for surfaces,
+   accent for the brand colour and ok / bad / warn / info for status. */
+@theme {
+  --font-sans: "Inter", "Noto Sans Gujarati", ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg: var(--c-bg);
+  --color-fg: var(--c-fg);
+  --color-muted: var(--c-muted);
+  --color-subtle: var(--c-subtle);
+  --color-surface: var(--c-surface);
+  --color-accent: var(--c-accent);
+  --color-accent-ink: var(--c-accent-ink);
+  --color-ok: var(--c-ok);
+  --color-bad: var(--c-bad);
+  --color-warn: var(--c-warn);
+  --color-info: var(--c-info);
+
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-spin-slow: spin 1s linear infinite;
+
+  @keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+}
+
+:root {
+  color-scheme: light;
+  --c-bg: #eef2f7;
+  --c-fg: #0f172a;
+  --c-muted: #475569;
+  --c-subtle: #64748b;
+  --c-surface: #ffffff;
+  --c-accent: #4f46e5;
+  --c-accent-ink: #4338ca;
+  --c-ok: #047857;
+  --c-bad: #be123c;
+  --c-warn: #b45309;
+  --c-info: #0369a1;
+  --glass-bg: rgb(255 255 255 / 0.82);
+  --glass-strong-bg: rgb(255 255 255 / 0.97);
+  --glass-border: rgb(15 23 42 / 0.08);
+  --glass-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.14);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --c-bg: #0b1120;
+  --c-fg: #e5e9f0;
+  --c-muted: #9aa6b8;
+  --c-subtle: #7d8aa0;
+  --c-surface: #141d2f;
+  --c-accent: #6366f1;
+  --c-accent-ink: #a5b4fc;
+  --c-ok: #34d399;
+  --c-bad: #fb7185;
+  --c-warn: #fbbf24;
+  --c-info: #38bdf8;
+  --glass-bg: rgb(20 29 47 / 0.78);
+  --glass-strong-bg: rgb(20 29 47 / 0.98);
+  --glass-border: rgb(148 163 184 / 0.13);
+  --glass-shadow: 0 10px 30px -14px rgb(0 0 0 / 0.6);
+}
+
+/* App-like: the page itself never scrolls; screens manage their own scroll areas */
+html, body, #root { height: 100%; overflow: hidden; }
+body {
+  background: var(--c-bg);
+  color: var(--c-fg);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.25s ease;
+}
+
+/* ---------- Surfaces ---------- */
+@utility glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+@utility glass-strong {
+  background: var(--glass-strong-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.35);
+}
+@utility glass-soft {
+  background: color-mix(in oklab, var(--c-fg) 4%, transparent);
+  border: 1px solid var(--glass-border);
+}
+@utility shimmer {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--c-fg) 5%, transparent) 0%, color-mix(in oklab, var(--c-fg) 11%, transparent) 50%, color-mix(in oklab, var(--c-fg) 5%, transparent) 100%);
+  background-size: 800px 100%;
+  animation: var(--animate-shimmer);
+}
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* Native controls follow the theme */
+[data-theme="dark"] input[type=date]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.6); }
+input[type=date]::-webkit-calendar-picker-indicator { cursor: pointer; }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+input:-webkit-autofill {
+  -webkit-text-fill-color: var(--c-fg);
+  -webkit-box-shadow: 0 0 0 1000px var(--c-surface) inset;
+  transition: background-color 9999s;
+}
+
+@layer base {
+  * { scrollbar-width: thin; scrollbar-color: color-mix(in oklab, var(--c-fg) 20%, transparent) transparent; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--c-fg) 18%, transparent); border-radius: 99px; }
+}
+
+::selection { background: color-mix(in oklab, var(--c-accent) 30%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
