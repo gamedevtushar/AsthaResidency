@@ -8,6 +8,7 @@ import { t, LangSwitch } from '../i18n'
 import { ThemeSwitch } from '../theme'
 import { pageVariants, confirmDialog, cx, Button } from './ui'
 import { forms } from './forms'
+import LogoMark from './Logo'
 
 const NAV = [
   { to: '/', key: 'dashboard', icon: LayoutDashboard, end: true },
@@ -30,9 +31,7 @@ export function Avatar({ profile, className = 'size-9' }) {
 function Logo() {
   return (
     <Link to="/" className="flex min-w-0 items-center gap-3">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-white">
-        <Building2 className="size-5" />
-      </div>
+      <LogoMark className="size-10 shrink-0" />
       <div className="min-w-0 leading-tight">
         <p className="truncate text-[15px] font-bold text-fg">{APP_NAME}</p>
         <p className="truncate text-xs text-muted">{t('appSub')}</p>

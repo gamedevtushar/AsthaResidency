@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react'
 import { motion, AnimatePresence, useAnimationControls } from 'motion/react'
 import { Link } from 'react-router-dom'
-import { Building2, ArrowLeft, ShieldCheck, Smartphone, BarChart3, User, Lock, Eye, EyeOff, AlertCircle, TrendingUp, CheckCircle2, ArrowRight } from 'lucide-react'
+import { ArrowLeft, ShieldCheck, Smartphone, BarChart3, User, Lock, Eye, EyeOff, AlertCircle, TrendingUp, CheckCircle2, ArrowRight } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { APP_NAME } from '../firebase'
 import { Button, Ring, cx } from '../components/ui'
 import { t, LangSwitch } from '../i18n'
 import { ThemeSwitch } from '../theme'
+import LogoMark from '../components/Logo'
 
 const fade = (delay = 0) => ({ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1], delay } })
 
@@ -109,7 +110,7 @@ export default function Login() {
       {/* Left: hero (desktop only) */}
       <div className="hidden min-h-0 flex-1 flex-col justify-between gap-6 px-12 py-10 lg:flex">
         <motion.div {...fade(0)} className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-accent shadow-lg ring-1 ring-fg/25"><Building2 className="size-6 text-fg" /></div>
+          <LogoMark className="size-11" />
           <span className="text-lg font-bold text-fg">{APP_NAME}</span>
           <Link to="/" className="ml-4 inline-flex h-9 items-center gap-2 rounded-xl border border-fg/12 px-3 text-sm font-medium text-muted transition hover:bg-fg/[0.04] hover:text-fg">
             <ArrowLeft className="size-4" />{t('login.back')}
@@ -135,8 +136,8 @@ export default function Login() {
             <motion.form animate={shake} onSubmit={submit} noValidate className="glass rounded-3xl p-6 sm:p-8">
               <div className="mb-7 text-center">
                 <motion.div initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14, delay: 0.25 }}
-                  className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-accent shadow-xl ring-1 ring-fg/25">
-                  <Building2 className="size-7 text-fg" />
+                  className="mx-auto mb-4 w-fit">
+                  <LogoMark className="size-16" title={APP_NAME} />
                 </motion.div>
                 <h1 className="text-2xl font-bold tracking-tight text-fg">{t('login.welcome')}</h1>
                 <p className="mt-1 text-sm text-muted">{t('login.sub', { app: APP_NAME })}</p>
