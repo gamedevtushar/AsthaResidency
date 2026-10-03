@@ -426,23 +426,6 @@ export function AnimatedNumber({ value, format = inr }) {
   return <motion.span>{text}</motion.span>
 }
 
-export function StatCard({ label, amount, value, sub, icon, tone = 'indigo', className }) {
-  return (
-    <Card className={cx('p-4', className)}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-xs font-semibold text-muted">{label}</p>
-          <p className="mt-1 truncate text-xl font-bold tracking-tight text-fg xl:text-2xl">
-            {amount !== undefined ? <AnimatedNumber value={amount} /> : value}
-          </p>
-          {sub && <p className="mt-0.5 truncate text-xs text-subtle">{sub}</p>}
-        </div>
-        {icon && <IconTile icon={icon} tone={tone} className="hidden size-9 sm:flex lg:hidden xl:flex" iconClass="size-[1.125rem]" />}
-      </div>
-    </Card>
-  )
-}
-
 const BAR = { green: 'bg-ok', indigo: 'bg-accent', red: 'bg-bad', amber: 'bg-warn' }
 export function Progress({ value, tone = 'green', className = 'h-2' }) {
   return (

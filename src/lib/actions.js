@@ -1,5 +1,10 @@
-import { collection, doc, serverTimestamp, setDoc, updateDoc, writeBatch } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, serverTimestamp, setDoc, updateDoc, writeBatch } from 'firebase/firestore'
 import { db } from '../firebase'
+
+/* Balances are read as one-off totals, so screens are told whenever money records change */
+const changeListeners = new Set()
+export const onMoneyChange = (fn) => { changeListeners.add(fn); return () => changeListeners.delete(fn) }
+const changed = (result) => { changeListeners.forEach((fn) => fn()); return result }
 
 export const UNPAID = { status: 'unpaid', paidOn: '', mode: '' }
 export const dueId = (period, unitId) => `${period}_${unitId}`
@@ -37,9 +42,18 @@ export async function recordPayment({ due, unit, period, amount, paidOn, mode, n
   const fields = { amount: Number(amount) || 0, paidOn, mode, note: note.trim(), status: 'paid', updatedAt: serverTimestamp() }
   if (due) await updateDoc(doc(db, 'dues', due.id), fields)
   else await setDoc(doc(db, 'dues', dueId(period, unit.id)), { ...newDue(unit, period), ...fields })
+  changed()
 }
 
-export const markUnpaid = (id) => updateDoc(doc(db, 'dues', id), { ...UNPAID, updatedAt: serverTimestamp() })
+export const markUnpaid = (id) => updateDoc(doc(db, 'dues', id), { ...UNPAID, updatedAt: serverTimestamp() }).then(changed)
+export const deleteDue = (id) => deleteDoc(doc(db, 'dues', id)).then(changed)
+
+/** Income / expense entries. `period` is the month the entry is for; `date` is only for the record. */
+export const saveEntry = (id, data) => (id
+  ? updateDoc(doc(db, 'transactions', id), { ...data, updatedAt: serverTimestamp() })
+  : addDoc(collection(db, 'transactions'), { ...data, createdAt: serverTimestamp() })).then(changed)
+export const deleteEntry = (id) => deleteDoc(doc(db, 'transactions', id)).then(changed)
+export const restoreEntry = (id, data) => setDoc(doc(db, 'transactions', id), data).then(changed)
 
 /**
  * Plan unit numbers for a wing: floors × flats per floor (A-101, A-102 …) plus shops (Shop 1 …).

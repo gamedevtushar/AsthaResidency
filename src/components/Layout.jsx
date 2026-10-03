@@ -1,6 +1,6 @@
 import { NavLink, Link, useLocation, useOutlet, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import { LayoutDashboard, ReceiptIndianRupee, Wallet, Building2, BarChart3, Users, LogOut, KeyRound, Plus, Menu as MenuIcon, LogIn, Eye, Download } from 'lucide-react'
+import { LayoutDashboard, Wallet, Building2, BarChart3, Users, LogOut, KeyRound, Plus, Menu as MenuIcon, LogIn, Eye, Download } from 'lucide-react'
 import { useAuth, roleLabel } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { APP_NAME } from '../firebase'
@@ -13,9 +13,7 @@ import LogoMark from './Logo'
 
 const NAV = [
   { to: '/', key: 'dashboard', icon: LayoutDashboard, end: true },
-  { to: '/maintenance', key: 'maintenance', icon: ReceiptIndianRupee },
-  { to: '/accounts', key: 'accounts', icon: Wallet },
-  { to: '/units', key: 'units', icon: Building2 },
+  { to: '/month', key: 'month', icon: Wallet },
   { to: '/reports', key: 'reports', icon: BarChart3 },
 ]
 
@@ -50,14 +48,15 @@ export default function Layout() {
   const { canPrompt, installed } = useInstall()
   const roleText = !isLoggedIn ? roleLabel('public')
     : profile.role === 'wing_admin' ? `${roleLabel('wing_admin')} · ${wingName(profile.wingId)}` : roleLabel(profile.role)
-  const nav = isSuper ? [...NAV, { to: '/users', key: 'users', icon: Users }] : NAV
+  // Wings & Units is only for admins
+  const nav = [...NAV, isAdmin && { to: '/units', key: 'units', icon: Building2 }, isSuper && { to: '/users', key: 'users', icon: Users }].filter(Boolean)
 
   const logout = async () => {
     if (await confirmDialog({ title: t('signOut'), message: t('confirm.signOut'), confirmText: t('signOut'), tone: 'primary' })) signOut()
   }
 
-  // Phone bar: admins get a centre "+"; visitors get Reports there instead
-  const mobileTabs = [NAV[0], NAV[1], isAdmin ? { fab: true } : NAV[4], NAV[2], { more: true }]
+  // Phone bar: admins get a centre "+"
+  const mobileTabs = isAdmin ? [NAV[0], NAV[1], { fab: true }, NAV[2], { more: true }] : [...NAV, { more: true }]
 
   return (
     <div className="flex h-dvh overflow-hidden">
@@ -140,7 +139,7 @@ export default function Layout() {
 
         {/* Phone bottom bar: docked under the scroll area, so nothing shows beneath it */}
         <nav className="z-30 shrink-0 border-t border-bar-line bg-bar pb-[env(safe-area-inset-bottom)] lg:hidden">
-          <div className="mx-auto grid max-w-lg grid-cols-5 items-center gap-1 px-2 py-1.5">
+          <div className={cx('mx-auto grid max-w-lg items-center gap-1 px-2 py-1.5', mobileTabs.length === 5 ? 'grid-cols-5' : 'grid-cols-4')}>
             {mobileTabs.map((item) => {
               if (item.fab) return (
                 <div key="fab" className="flex justify-center">

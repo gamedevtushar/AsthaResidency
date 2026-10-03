@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { collection, query, where } from 'firebase/firestore'
-import { Download, PartyPopper, CalendarRange } from 'lucide-react'
+import { Download, PartyPopper, CalendarRange, Info } from 'lucide-react'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { useQuery } from '../hooks/useQuery'
-import { inr, sum, periodLabel, periodRange, downloadCsv, byNumber } from '../lib/format'
+import { useEntries } from '../hooks/useEntries'
+import { inr, sum, periodLabel, downloadCsv, byNumber } from '../lib/format'
+import { monthDues, periodOf } from '../lib/ledger'
 import { categoryIcon } from '../lib/icons'
 import { Button, Card, EmptyState, IconTile, PageHeader, Progress, Segmented, Select, SkeletonList, cx, reveal, toast } from '../components/ui'
 import { WingChips } from '../components/filters'
@@ -23,52 +25,60 @@ const panel = 'glass flex min-h-[320px] flex-col overflow-hidden rounded-2xl lg:
 
 export default function Reports() {
   const { profile } = useAuth()
-  const { wingName } = useData()
+  const { units, wingName } = useData()
   const [year, setYear] = useState(fyStart())
   const [wing, setWing] = useState(profile?.role === 'wing_admin' ? profile.wingId : '')
   const [tab, setTab] = useState('summary')
   const periods = useMemo(() => fyPeriods(year), [year])
-  const [from, to] = periodRange(periods[0], periods[11])
 
   const { data: dues, loading: l1 } = useQuery(() => query(collection(db, 'dues'), where('period', 'in', periods)), [year])
-  const { data: txns, loading: l2 } = useQuery(
-    () => query(collection(db, 'transactions'), where('date', '>=', from), where('date', '<=', to)), [year])
+  const { data: txns, loading: l2 } = useEntries(periods)
 
+  // Everything is counted in the month it is FOR, whenever the money was actually paid
   const r = useMemo(() => {
+    const U = units.filter((x) => !wing || x.wingId === wing)
     const D = dues.filter((x) => !wing || x.wingId === wing)
     const T = txns.filter((x) => !wing || x.wingId === wing)
+    const pend = {}
     const rows = periods.map((p) => {
-      const pd = D.filter((x) => x.period === p)
-      const pt = T.filter((x) => x.date.startsWith(p))
+      const md = monthDues(U, D, p)
+      const pt = T.filter((x) => periodOf(x) === p)
+      md.filter((x) => x.status === 'due').forEach((x) => {
+        pend[x.id] ||= { number: x.number, wingId: x.wingId, ownerName: x.ownerName, months: [], amount: 0 }
+        pend[x.id].months.push(p)
+        pend[x.id].amount += x.amount
+      })
       const row = {
         p,
-        billed: sum(pd),
-        collected: sum(pd.filter((x) => x.status === 'paid')),
+        billed: sum(md.filter((x) => x.status !== 'none')),
+        collected: sum(md.filter((x) => x.status === 'paid')),
+        pending: sum(md.filter((x) => x.status === 'due')),
         income: sum(pt.filter((x) => x.type === 'income')),
         expense: sum(pt.filter((x) => x.type === 'expense')),
       }
       row.net = row.collected + row.income - row.expense
       return row
     })
-    const total = ['billed', 'collected', 'income', 'expense', 'net'].reduce((o, k) => ({ ...o, [k]: sum(rows, k) }), {})
+    const total = ['billed', 'collected', 'pending', 'income', 'expense', 'net'].reduce((o, k) => ({ ...o, [k]: sum(rows, k) }), {})
     const cats = {}
     T.filter((x) => x.type === 'expense').forEach((x) => { cats[x.category] = (cats[x.category] || 0) + Number(x.amount) })
     const categories = Object.entries(cats).sort((a, b) => b[1] - a[1])
-    const pend = {}
-    D.filter((x) => x.status === 'unpaid').forEach((x) => {
-      pend[x.unitId] ||= { number: x.number, wingId: x.wingId, ownerName: x.ownerName, months: [], amount: 0 }
-      pend[x.unitId].months.push(x.period)
-      pend[x.unitId].amount += Number(x.amount) || 0
-    })
     const pending = Object.values(pend).sort((a, b) => b.amount - a.amount || byNumber(a, b))
-    return { rows, total, categories, pending }
-  }, [dues, txns, wing, periods])
+    return { rows, total, categories, pending, dues: D, entries: T }
+  }, [units, dues, txns, wing, periods])
 
   const exportCsv = () => {
+    // Summary by month, then every entry with its actual date (handy for filtering by date in Excel)
     if (tab === 'summary') downloadCsv(`summary-FY${fyName(year)}.csv`, [
-      ['Month', 'Maintenance billed', 'Maintenance collected', 'Other income', 'Expenses', 'Net'],
-      ...r.rows.map((x) => [periodLabel(x.p), x.billed, x.collected, x.income, x.expense, x.net]),
-      ['Total', r.total.billed, r.total.collected, r.total.income, r.total.expense, r.total.net],
+      ['Month', 'Maintenance billed', 'Maintenance collected', 'Maintenance pending', 'Other income', 'Expenses', 'Balance'],
+      ...r.rows.map((x) => [periodLabel(x.p), x.billed, x.collected, x.pending, x.income, x.expense, x.net]),
+      ['Total', r.total.billed, r.total.collected, r.total.pending, r.total.income, r.total.expense, r.total.net],
+      [],
+      ['For month', 'Paid on', 'Type', 'Wing', 'Unit / Category', 'Owner / Description', 'Mode', 'Amount'],
+      ...r.dues.filter((x) => x.status === 'paid').sort((a, b) => a.period.localeCompare(b.period) || byNumber(a, b))
+        .map((x) => [periodLabel(x.period), x.paidOn, 'Maintenance', wingName(x.wingId), x.number, x.ownerName, x.mode, x.amount]),
+      ...[...r.entries].sort((a, b) => periodOf(a).localeCompare(periodOf(b)) || (a.date || '').localeCompare(b.date || ''))
+        .map((x) => [periodLabel(periodOf(x)), x.date, x.type === 'income' ? 'Income' : 'Expense', wingName(x.wingId), x.category, x.description, x.mode, x.amount]),
     ])
     else downloadCsv(`pending-dues-FY${fyName(year)}.csv`, [
       ['Unit', 'Wing', 'Owner', 'Months', 'Amount'],
@@ -96,6 +106,8 @@ export default function Reports() {
           options={[{ value: 'summary', label: t('r.summary') }, { value: 'pending', label: t('r.pendingTab', { n: r.pending.length }) }]} />
       </motion.div>
 
+      <motion.p variants={reveal} className="mb-3 flex shrink-0 items-start gap-2 text-xs text-muted lg:mb-4"><Info className="mt-0.5 size-4 shrink-0 text-info" />{t('r.monthNote')}</motion.p>
+
       {loading ? <Card><SkeletonList rows={6} /></Card> : (
         <AnimatePresence mode="wait">
           {tab === 'summary' ? (
@@ -103,12 +115,13 @@ export default function Reports() {
               className="grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:gap-4">
               <div className={cx(panel, 'lg:col-span-2')}>
                 <div className="no-scrollbar min-h-0 flex-1 overflow-auto">
-                  <table className="w-full min-w-[36rem] whitespace-nowrap text-sm">
+                  <table className="w-full min-w-[42rem] whitespace-nowrap text-sm">
                     <thead className="sticky top-0 z-10 bg-surface/90 text-[0.8125rem] uppercase tracking-wider text-muted backdrop-blur-md">
                       <tr>
                         <th className="px-4 py-3.5 text-left font-medium">{t('r.month')}</th>
                         <th className="px-3 py-3.5 text-right font-medium">{t('r.billed')}</th>
                         <th className="px-3 py-3.5 text-right font-medium">{t('r.collected')}</th>
+                        <th className="px-3 py-3.5 text-right font-medium">{t('mo.pending')}</th>
                         <th className="px-3 py-3.5 text-right font-medium">{t('r.otherInc')}</th>
                         <th className="px-3 py-3.5 text-right font-medium">{t('expenses')}</th>
                         <th className="px-4 py-3.5 text-right font-medium">{t('r.net')}</th>
@@ -120,6 +133,7 @@ export default function Reports() {
                           <td className="px-4 py-3 font-medium text-fg">{periodLabel(x.p, true)}</td>
                           <td className="px-3 py-3 text-right text-muted">{inr(x.billed)}</td>
                           <td className="px-3 py-3 text-right text-ok">{inr(x.collected)}</td>
+                          <td className={cx('px-3 py-3 text-right', x.pending ? 'text-bad' : 'text-subtle')}>{inr(x.pending)}</td>
                           <td className="px-3 py-3 text-right text-muted">{inr(x.income)}</td>
                           <td className="px-3 py-3 text-right text-bad">{inr(x.expense)}</td>
                           <td className={cx('px-4 py-3 text-right font-semibold', x.net < 0 ? 'text-bad' : 'text-fg')}>{inr(x.net)}</td>
@@ -131,6 +145,7 @@ export default function Reports() {
                         <td className="px-4 py-3.5 text-fg">{t('r.total')}</td>
                         <td className="px-3 py-3.5 text-right text-muted">{inr(r.total.billed)}</td>
                         <td className="px-3 py-3.5 text-right text-ok">{inr(r.total.collected)}</td>
+                        <td className="px-3 py-3.5 text-right text-bad">{inr(r.total.pending)}</td>
                         <td className="px-3 py-3.5 text-right text-fg">{inr(r.total.income)}</td>
                         <td className="px-3 py-3.5 text-right text-bad">{inr(r.total.expense)}</td>
                         <td className={cx('px-4 py-3.5 text-right', r.total.net < 0 ? 'text-bad' : 'text-fg')}>{inr(r.total.net)}</td>

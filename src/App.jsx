@@ -8,8 +8,7 @@ import Layout from './components/Layout'
 import { FormHost } from './components/forms'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
-import Maintenance from './pages/Maintenance'
-import Accounts from './pages/Accounts'
+import Monthly from './pages/Monthly'
 import Units from './pages/Units'
 import Reports from './pages/Reports'
 import UsersPage from './pages/Users'
@@ -20,7 +19,7 @@ import { Settings } from 'lucide-react'
 
 /** Everyone can view without logging in. Admins log in from the menu (/login). */
 export default function App() {
-  const { isLoggedIn, loading, isSuper } = useAuth()
+  const { isLoggedIn, loading, isSuper, isAdmin } = useAuth()
 
   return (
     <MotionConfig reducedMotion="user">
@@ -33,9 +32,11 @@ export default function App() {
             <Route path="login" element={isLoggedIn ? <Navigate to="/" replace /> : <Login />} />
             <Route element={<Layout />}>
               <Route index element={<Dashboard />} />
-              <Route path="maintenance" element={<Maintenance />} />
-              <Route path="accounts" element={<Accounts />} />
-              <Route path="units" element={<Units />} />
+              <Route path="month" element={<Monthly />} />
+              {/* Old links */}
+              <Route path="maintenance" element={<Navigate to="/month" replace />} />
+              <Route path="accounts" element={<Navigate to="/month" replace />} />
+              {isAdmin && <Route path="units" element={<Units />} />}
               <Route path="reports" element={<Reports />} />
               {isSuper && <Route path="users" element={<UsersPage />} />}
               <Route path="*" element={<Navigate to="/" replace />} />

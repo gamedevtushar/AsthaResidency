@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from 'motion/react'
-import { ChevronLeft, ChevronRight, Search, X, CalendarDays, Building2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, X, CalendarDays } from 'lucide-react'
 import { useData } from '../context/DataContext'
 import { periodLabel, shiftPeriod, currentPeriod } from '../lib/format'
-import { Chips, Select, cx } from './ui'
+import { Chips, cx } from './ui'
 import { t } from '../i18n'
 
 const wingOptions = (wings, includeCommon, allLabel) => [
@@ -10,12 +10,6 @@ const wingOptions = (wings, includeCommon, allLabel) => [
   ...(includeCommon ? [{ value: 'common', label: t('common') }] : []),
   ...wings.map((w) => ({ value: w.id, label: w.name })),
 ]
-
-/** Dropdown wing filter. value: '' = all wings, 'common' = common only (when includeCommon) */
-export function WingSelect({ value, onChange, includeCommon = false, allLabel, className = 'sm:w-48' }) {
-  const { wings } = useData()
-  return <Select size="sm" icon={Building2} value={value} onChange={onChange} options={wingOptions(wings, includeCommon, allLabel)} className={className} />
-}
 
 /** Horizontal wing chips (scrolls sideways on small screens) */
 export function WingChips({ value, onChange, includeCommon = false, counts, className }) {
@@ -64,5 +58,3 @@ export function SearchBox({ value, onChange, placeholder = '', className = '' })
   )
 }
 
-/** Wing filter matcher: '' all, 'common' → wingId '', otherwise exact */
-export const matchWing = (filter, wingId) => !filter || (filter === 'common' ? !wingId : wingId === filter)

@@ -42,22 +42,24 @@ for (const w of ['A', 'B', 'C']) {
       DB.units.push({
         id: `${w}${floor}0${n}`, wingId: w, number: shop ? `Shop ${n}` : `${w}-${floor}0${n}`,
         type: shop ? 'shop' : 'flat', ownerName: owners[(floor * 3 + n) % owners.length],
-        maintenance: shop ? 2500 : 1500,
+        maintenance: shop ? 2500 : 1500, createdAt: new Date(now.getFullYear(), now.getMonth() - 5, 1),
       })
       DB.unitContacts.push({ id: `${w}${floor}0${n}`, wingId: w, phone: `98250${10000 + floor * 100 + n}` })
     }
   }
 }
 
-// Bills for the last 6 months (current month partly paid)
+// Maintenance for the last 6 months. Only payments are stored; flats with no record are simply pending.
+// Many people pay a month late, so paidOn is often in the following month.
 for (let k = 0; k < 6; k++) {
   for (const u of DB.units) {
-    const paid = rnd() < (k === 0 ? 0.6 : 0.9)
+    if (rnd() > (k === 0 ? 0.55 : 0.9)) continue
+    const late = k > 0 && rnd() < 0.4
     DB.dues.push({
       id: `${period(k)}_${u.id}`, period: period(k), unitId: u.id, wingId: u.wingId, number: u.number, type: u.type,
-      ownerName: u.ownerName, amount: u.maintenance, status: paid ? 'paid' : 'unpaid',
-      paidOn: paid ? `${period(k)}-0${1 + Math.floor(rnd() * 9)}` : '',
-      mode: paid ? ['UPI', 'Cash', 'Bank Transfer'][Math.floor(rnd() * 3)] : '', note: '',
+      ownerName: u.ownerName, amount: u.maintenance, status: 'paid',
+      paidOn: `${period(late ? k - 1 : k)}-0${1 + Math.floor(rnd() * 9)}`,
+      mode: ['UPI', 'Cash', 'Bank Transfer'][Math.floor(rnd() * 3)], note: '',
     })
   }
 }
@@ -66,9 +68,10 @@ const expenses = [['Electricity', 6200, '', 'DGVCL bill'], ['Security', 9000, ''
   ['Lift Maintenance', 3500, 'A', 'AMC'], ['Water', 1800, 'B', 'Tanker'], ['Repairs', 2400, 'C', 'Plumbing work']]
 for (let k = 0; k < 6; k++) {
   expenses.forEach(([category, base, wingId, description], i) => DB.transactions.push({
-    id: `t${k}${i}`, type: 'expense', category, amount: Math.round(base * (0.8 + rnd() * 0.4)), wingId,
+    id: `t${k}${i}`, type: 'expense', category, amount: Math.round(base * (0.8 + rnd() * 0.4)), wingId, period: period(k),
     date: `${period(k)}-${pad(3 + i * 3)}`, mode: i % 2 ? 'UPI' : 'Bank Transfer', description,
   }))
 }
-DB.transactions.push({ id: 'ti1', type: 'income', category: 'Parking', amount: 1200, wingId: '', date: `${period(0)}-02`, mode: 'Cash', description: 'Visitor parking' })
-DB.transactions.push({ id: 'ti2', type: 'income', category: 'Late Fee / Penalty', amount: 500, wingId: 'A', date: `${period(1)}-15`, mode: 'UPI', description: '' })
+DB.transactions.push({ id: 'ti0', type: 'income', category: 'Opening Balance', amount: 85000, wingId: '', period: period(5), date: `${period(5)}-01`, mode: 'Bank Transfer', description: 'Bank balance when we started' })
+DB.transactions.push({ id: 'ti1', type: 'income', category: 'Parking', amount: 1200, wingId: '', period: period(0), date: `${period(0)}-02`, mode: 'Cash', description: 'Visitor parking' })
+DB.transactions.push({ id: 'ti2', type: 'income', category: 'Late Fee / Penalty', amount: 500, wingId: 'A', period: period(1), date: `${period(0)}-04`, mode: 'UPI', description: '' })

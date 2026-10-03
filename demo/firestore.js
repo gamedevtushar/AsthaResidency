@@ -31,6 +31,15 @@ export const query = (col, ...wheres) => ({ ...col, wheres: [...col.wheres, ...w
 export const doc = (a, name, id) => (name === undefined ? { name: a.name, id: newId() } : { name, id })
 export const serverTimestamp = () => null
 
+/** Totals like getAggregateFromServer(q, { v: sum('amount') }) */
+export const sum = (field) => ({ field })
+export async function getAggregateFromServer(target, spec) {
+  await delay(200)
+  const rows = run(target).docs.map((d) => d.data())
+  const out = Object.fromEntries(Object.entries(spec).map(([k, { field }]) => [k, rows.reduce((t, r) => t + (Number(r[field]) || 0), 0)]))
+  return { data: () => out }
+}
+
 export function onSnapshot(target, cb, onError) {
   const l = { target, cb }
   listeners.add(l)

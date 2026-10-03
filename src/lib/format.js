@@ -32,16 +32,16 @@ export const shiftPeriod = (p, delta) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`
 }
 
-/** Last n periods ending at `end`, oldest first */
-export const lastPeriods = (n, end = currentPeriod()) =>
-  Array.from({ length: n }, (_, i) => shiftPeriod(end, i - n + 1))
-
 /** First and last date (YYYY-MM-DD) of a period range */
 export const periodRange = (from, to = from) => {
   const [y, m] = to.split('-').map(Number)
   const lastDay = new Date(y, m, 0).getDate()
   return [`${from}-01`, `${to}-${pad(lastDay)}`]
 }
+
+/** "2026-10-05" → "5 Oct" */
+export const shortDate = (s) =>
+  s ? new Date(s + 'T00:00:00').toLocaleDateString(locale(), { day: 'numeric', month: 'short' }) : '—'
 
 export const dateLabel = (s) =>
   s ? new Date(s + 'T00:00:00').toLocaleDateString(locale(), { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
@@ -70,4 +70,4 @@ export const EXPENSE_CATEGORIES = [
   'Garden', 'Salary', 'Plumbing', 'Painting', 'Stationery', 'Other',
 ]
 
-export const INCOME_CATEGORIES = ['Late Fee / Penalty', 'Parking', 'Rent', 'Donation', 'Interest', 'Other']
+export const INCOME_CATEGORIES = ['Late Fee / Penalty', 'Parking', 'Rent', 'Donation', 'Interest', 'Opening Balance', 'Other']

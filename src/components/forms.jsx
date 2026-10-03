@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { addDoc, collection, deleteDoc, doc, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
 import { sendPasswordResetEmail } from 'firebase/auth'
 import {
-  ReceiptIndianRupee, ArrowUpCircle, ArrowDownCircle, Home, Store, Building2, UserPlus, Users, BarChart3, KeyRound, LogOut,
+  ReceiptIndianRupee, ArrowUpCircle, ArrowDownCircle, Home, Store, Building2, UserPlus, Users, KeyRound, LogOut,
   Languages, CheckCircle2, RotateCcw, Trash2, Check, Eye, EyeOff, Wand2, Copy, Share2, Crown, UserCog, Shield, Ban, Pencil, Layers, ChevronRight, X, Plus, SunMoon, ALargeSmall, LogIn, CalendarCog,
   Download, Share, SquarePlus, Compass, EllipsisVertical, Smartphone,
 } from 'lucide-react'
@@ -13,14 +13,15 @@ import { useAuth, roleLabel } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { useQuery } from '../hooks/useQuery'
 import { inr, today, dateLabel, currentPeriod, shiftPeriod, periodLabel, PAYMENT_MODES, EXPENSE_CATEGORIES, INCOME_CATEGORIES, byNumber } from '../lib/format'
-import { recordPayment, markUnpaid, dueId, planUnits, createUnits, createWingWithUnits, updateWingMaintenance, saveMonthBills } from '../lib/actions'
+import { recordPayment, markUnpaid, deleteDue, saveEntry, deleteEntry, restoreEntry, dueId, planUnits, createUnits, createWingWithUnits, updateWingMaintenance, saveMonthBills } from '../lib/actions'
+import { periodOf } from '../lib/ledger'
 import { MODE_ICONS, categoryIcon } from '../lib/icons'
 import { t, tv, LangSwitch } from '../i18n'
 import { ThemeSwitch, TextSizeSwitch } from '../theme'
 import { useInstall, promptInstall, isIOS } from '../pwa'
 import LogoMark from './Logo'
 import { AmountInput, Button, Chips, DateField, Field, IconTile, Input, Modal, Segmented, Select, SkeletonTiles, Stepper, confirmDialog, cx, toast } from './ui'
-import { SearchBox } from './filters'
+import { MonthPicker, SearchBox } from './filters'
 
 /* ================= Global form host ================= */
 let setCurrent = () => {}
@@ -83,7 +84,7 @@ function QuickAddSheet({ onClose }) {
 
 /* ================= Mobile "More" menu ================= */
 function MoreSheet({ onClose }) {
-  const { profile, isLoggedIn, isSuper, signOut } = useAuth()
+  const { profile, isLoggedIn, isSuper, isAdmin, signOut } = useAuth()
   const { wingName } = useData()
   const { canPrompt, installed } = useInstall()
   const navigate = useNavigate()
@@ -115,10 +116,11 @@ function MoreSheet({ onClose }) {
             <Download className="size-5 shrink-0 text-accent-ink" />
           </button>
         )}
-        <Row icon={Building2} label={t('nav.units')} onClick={() => go('/units')} />
-        <Row icon={BarChart3} label={t('nav.reports')} onClick={() => go('/reports')} />
-        {isSuper && <Row icon={Users} label={t('nav.users')} onClick={() => go('/users')} />}
-        <div className="my-2 h-px bg-fg/10" />
+        {isAdmin && <>
+          <Row icon={Building2} label={t('nav.units')} onClick={() => go('/units')} />
+          {isSuper && <Row icon={Users} label={t('nav.users')} onClick={() => go('/users')} />}
+          <div className="my-2 h-px bg-fg/10" />
+        </>}
         <div className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-base text-fg">
           <IconTile icon={Languages} tone="gray" className="size-9" iconClass="size-[1.125rem]" />
           <span className="flex-1">{t('language')}</span>
@@ -194,7 +196,6 @@ function CollectSheet({ onClose, period = currentPeriod() }) {
               </span>
               <span className="mt-0.5 w-full truncate text-xs text-muted">{unit.ownerName || '—'}</span>
               <span className="mt-2.5 text-sm font-semibold text-ok">{inr(due?.amount ?? unit.maintenance)}</span>
-              {!due && <span className="mt-1 text-[0.75rem] text-subtle">{t('collect.notBilled')}</span>}
             </motion.button>
           ))}
         </div>
@@ -237,7 +238,7 @@ function PaymentForm({ due, unit, period, returnTo, onClose }) {
   }
   const remove = async () => {
     if (!(await confirmDialog({ message: t('m.confirmDelete'), confirmText: t('delete') }))) return
-    try { await deleteDoc(doc(db, 'dues', due.id)); toast.success(t('m.deleted'), { title: number }); onClose() } catch (err) { toast.error(err) }
+    try { await deleteDue(due.id); toast.success(t('m.deleted'), { title: number }); onClose() } catch (err) { toast.error(err) }
   }
 
   return (
@@ -260,7 +261,7 @@ function PaymentForm({ due, unit, period, returnTo, onClose }) {
         <Field label={t('paymentMode')}>
           <Chips variant="tile" className="grid-cols-4" value={f.mode} onChange={(mode) => setF({ ...f, mode })} options={modeOptions()} />
         </Field>
-        <Field label={t('m.paidOn')}><DateField value={f.paidOn} onChange={(paidOn) => setF({ ...f, paidOn })} /></Field>
+        <Field label={t('m.paidOnNote')}><DateField value={f.paidOn} onChange={(paidOn) => setF({ ...f, paidOn })} /></Field>
         <Field label={t('m.note')} optional><Input value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} /></Field>
       </form>
     </Modal>
@@ -272,7 +273,7 @@ const IconOnly = ({ icon: Icon, label, onClick }) => (
 )
 
 /* ================= Income / expense ================= */
-function EntryForm({ entry, type: initType = 'expense', wingId: initWing, date: initDate, onClose }) {
+function EntryForm({ entry, type: initType = 'expense', wingId: initWing, period: initPeriod, onClose }) {
   const { isSuper, canEdit } = useAuth()
   const { wings } = useData()
   const wingOptions = [
@@ -280,8 +281,8 @@ function EntryForm({ entry, type: initType = 'expense', wingId: initWing, date: 
     ...wings.filter((w) => canEdit(w.id)).map((w) => ({ value: w.id, label: w.name })),
   ]
   const [f, setF] = useState(entry
-    ? { ...entry, amount: String(entry.amount) }
-    : { type: initType, wingId: initWing !== undefined && wingOptions.some((o) => o.value === initWing) ? initWing : wingOptions[0]?.value ?? '', category: (initType === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES)[0], amount: '', date: initDate || today(), mode: 'Cash', description: '' })
+    ? { ...entry, amount: String(entry.amount), period: periodOf(entry) }
+    : { type: initType, wingId: initWing !== undefined && wingOptions.some((o) => o.value === initWing) ? initWing : wingOptions[0]?.value ?? '', category: (initType === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES)[0], amount: '', period: initPeriod || currentPeriod(), date: today(), mode: 'Cash', description: '' })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const cats = f.type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES
@@ -291,10 +292,9 @@ function EntryForm({ entry, type: initType = 'expense', wingId: initWing, date: 
     e.preventDefault()
     if (!(Number(f.amount) > 0)) return setError(t('a.enterAmount'))
     setBusy(true)
-    const data = { type: f.type, wingId: f.wingId, category: f.category, amount: Number(f.amount), date: f.date, mode: f.mode, description: f.description.trim() }
+    const data = { type: f.type, wingId: f.wingId, category: f.category, amount: Number(f.amount), period: f.period, date: f.date, mode: f.mode, description: f.description.trim() }
     try {
-      if (entry) await updateDoc(doc(db, 'transactions', entry.id), { ...data, updatedAt: serverTimestamp() })
-      else await addDoc(collection(db, 'transactions'), { ...data, createdAt: serverTimestamp() })
+      await saveEntry(entry?.id, data)
       toast.success(`${tv(data.category)} · ${inr(data.amount)}`, { title: t('saved') })
       onClose()
     } catch (err) { toast.error(err); setBusy(false) }
@@ -303,8 +303,8 @@ function EntryForm({ entry, type: initType = 'expense', wingId: initWing, date: 
     if (!(await confirmDialog({ message: t('a.confirmDelete'), confirmText: t('delete') }))) return
     const { id, ...data } = entry
     try {
-      await deleteDoc(doc(db, 'transactions', id))
-      toast.success(`${tv(data.category)} · ${inr(data.amount)}`, { title: t('deleted'), action: { label: t('undo'), onClick: () => setDoc(doc(db, 'transactions', id), data).catch(toast.error) } })
+      await deleteEntry(id)
+      toast.success(`${tv(data.category)} · ${inr(data.amount)}`, { title: t('deleted'), action: { label: t('undo'), onClick: () => restoreEntry(id, data).catch(toast.error) } })
       onClose()
     } catch (err) { toast.error(err) }
   }
@@ -332,7 +332,8 @@ function EntryForm({ entry, type: initType = 'expense', wingId: initWing, date: 
         {wingOptions.length > 1 && (
           <Field label={t('wing')}><Chips value={f.wingId} onChange={(wingId) => setF({ ...f, wingId })} options={wingOptions} /></Field>
         )}
-        <Field label={t('date')}><DateField value={f.date} onChange={(date) => setF({ ...f, date })} /></Field>
+        <Field label={t('a.forMonth')}><MonthPicker value={f.period} onChange={(period) => setF({ ...f, period })} className="w-full" /></Field>
+        <Field label={t('a.dateNote')}><DateField value={f.date} onChange={(date) => setF({ ...f, date })} /></Field>
         <Field label={t('paymentMode')}>
           <Chips variant="tile" className="grid-cols-4" value={f.mode} onChange={(mode) => setF({ ...f, mode })} options={modeOptions()} />
         </Field>
