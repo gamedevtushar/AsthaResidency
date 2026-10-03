@@ -1,6 +1,6 @@
 import { NavLink, Link, useLocation, useOutlet, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import { LayoutDashboard, Wallet, Building2, BarChart3, Users, LogOut, KeyRound, Plus, Menu as MenuIcon, LogIn, Eye, Download } from 'lucide-react'
+import { Wallet, Building2, BarChart3, Users, LogOut, KeyRound, Plus, Menu as MenuIcon, LogIn, Eye, Download } from 'lucide-react'
 import { useAuth, roleLabel } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { APP_NAME } from '../firebase'
@@ -12,8 +12,7 @@ import { useInstall } from '../pwa'
 import LogoMark from './Logo'
 
 const NAV = [
-  { to: '/', key: 'dashboard', icon: LayoutDashboard, end: true },
-  { to: '/month', key: 'month', icon: Wallet },
+  { to: '/', key: 'month', icon: Wallet, end: true },
   { to: '/reports', key: 'reports', icon: BarChart3 },
 ]
 
@@ -56,7 +55,7 @@ export default function Layout() {
   }
 
   // Phone bar: admins get a centre "+"
-  const mobileTabs = isAdmin ? [NAV[0], NAV[1], { fab: true }, NAV[2], { more: true }] : [...NAV, { more: true }]
+  const mobileTabs = isAdmin ? [NAV[0], { fab: true }, NAV[1], { more: true }] : [...NAV, { more: true }]
 
   return (
     <div className="flex h-dvh overflow-hidden">
@@ -139,7 +138,7 @@ export default function Layout() {
 
         {/* Phone bottom bar: docked under the scroll area, so nothing shows beneath it */}
         <nav className="z-30 shrink-0 border-t border-bar-line bg-bar pb-[env(safe-area-inset-bottom)] lg:hidden">
-          <div className={cx('mx-auto grid max-w-lg items-center gap-1 px-2 py-1.5', mobileTabs.length === 5 ? 'grid-cols-5' : 'grid-cols-4')}>
+          <div className={cx('mx-auto grid max-w-lg items-center gap-1 px-2 py-1.5', mobileTabs.length === 4 ? 'grid-cols-4' : 'grid-cols-3')}>
             {mobileTabs.map((item) => {
               if (item.fab) return (
                 <div key="fab" className="flex justify-center">

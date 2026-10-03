@@ -7,7 +7,6 @@ import Backdrop from './components/Backdrop'
 import Layout from './components/Layout'
 import { FormHost } from './components/forms'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
 import Monthly from './pages/Monthly'
 import Units from './pages/Units'
 import Reports from './pages/Reports'
@@ -31,11 +30,7 @@ export default function App() {
           <Routes>
             <Route path="login" element={isLoggedIn ? <Navigate to="/" replace /> : <Login />} />
             <Route element={<Layout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="month" element={<Monthly />} />
-              {/* Old links */}
-              <Route path="maintenance" element={<Navigate to="/month" replace />} />
-              <Route path="accounts" element={<Navigate to="/month" replace />} />
+              <Route index element={<Monthly />} />
               {isAdmin && <Route path="units" element={<Units />} />}
               <Route path="reports" element={<Reports />} />
               {isSuper && <Route path="users" element={<UsersPage />} />}

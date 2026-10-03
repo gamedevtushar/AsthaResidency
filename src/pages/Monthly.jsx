@@ -1,42 +1,54 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { collection, query, where } from 'firebase/firestore'
-import { Download, Plus, CheckCircle2, CalendarCog, Store, Wallet, ReceiptIndianRupee, Layers, LayoutGrid, Rows3 } from 'lucide-react'
+import { Download, Plus, CheckCircle2, CalendarCog, Store, Wallet, Layers, LayoutGrid, Rows3 } from 'lucide-react'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { useQuery } from '../hooks/useQuery'
 import { useEntries } from '../hooks/useEntries'
-import { inr, sum, currentPeriod, shortDate, downloadCsv } from '../lib/format'
+import { useBalances } from '../hooks/useBalances'
+import { inr, sum, shortDate, downloadCsv, defaultPeriod } from '../lib/format'
 import { monthDues } from '../lib/ledger'
 import { categoryIcon } from '../lib/icons'
 import { t, tv } from '../i18n'
-import { Button, Card, EmptyState, IconButton, IconTile, PageHeader, ScrollCard, Segmented, SkeletonList, SkeletonTiles, Spinner, cx, toast } from '../components/ui'
+import { AnimatedNumber, Button, Card, EmptyState, IconButton, IconTile, ScrollCard, Segmented, SkeletonList, SkeletonTiles, Spinner, cx, toast } from '../components/ui'
 import { MonthPicker } from '../components/filters'
 import { forms } from '../components/forms'
 
-/** One screen per month: every flat's maintenance, plus that month's other income and expenses */
+/**
+ * The main screen. Wing tabs on top, the balance, then one month at a time:
+ * every flat's maintenance and that month's other income and expenses.
+ * Accounts are usually settled a month later, so last month opens first.
+ */
 export default function Monthly() {
-  const { isAdmin, canEdit } = useAuth()
+  const { profile, isAdmin, canEdit } = useAuth()
   const { units, wings, wingName, loading: unitsLoading } = useData()
-  const [period, setPeriod] = useState(currentPeriod())
+  const [period, setPeriod] = useState(defaultPeriod())
+  const [wing, setWing] = useState(profile?.role === 'wing_admin' ? profile.wingId : '') // '' all · 'common' · wing id
   const [view, setViewState] = useState(() => { try { return localStorage.getItem('flatView') || 'grid' } catch { return 'grid' } })
   const setView = (v) => { setViewState(v); try { localStorage.setItem('flatView', v) } catch { /* storage unavailable */ } }
   const months = useMemo(() => [period], [period])
 
+  const { rows: balances, loading: lb } = useBalances(unitsLoading ? [] : wings)
   const { data: dues, loading: l1 } = useQuery(() => query(collection(db, 'dues'), where('period', '==', period)), [period])
   const { data: entries, loading: l2 } = useEntries(months)
 
-  const rows = useMemo(() => monthDues(units, dues, period), [units, dues, period])
+  const inTab = (wingId) => !wing || (wing === 'common' ? !wingId : wingId === wing)
+  const rows = useMemo(() => monthDues(units, dues, period).filter((r) => wing !== 'common' && (!wing || r.wingId === wing)), [units, dues, period, wing])
   const groups = wings.map((w) => ({ wing: w, items: rows.filter((r) => r.wingId === w.id) })).filter((g) => g.items.length)
-  const list = useMemo(() => [...entries].sort((a, b) => (b.date || '').localeCompare(a.date || '')), [entries])
+  const list = useMemo(() => entries.filter((x) => inTab(x.wingId)).sort((a, b) => (b.date || '').localeCompare(a.date || '')),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [entries, wing])
 
+  const shownBalances = balances.filter((b) => inTab(b.id))
+  const balance = sum(shownBalances, 'balance')
   const paid = rows.filter((r) => r.status === 'paid')
   const due = rows.filter((r) => r.status === 'due')
-  const income = sum(entries.filter((x) => x.type === 'income'))
-  const expense = sum(entries.filter((x) => x.type === 'expense'))
-  const balance = sum(paid) + income - expense
+  const income = sum(list.filter((x) => x.type === 'income'))
+  const expense = sum(list.filter((x) => x.type === 'expense'))
   const canCollect = wings.some((w) => canEdit(w.id))
+  const tabs = [{ value: '', label: t('allWings') }, ...wings.map((w) => ({ value: w.id, label: w.name })), { value: 'common', label: t('common') }]
 
   const exportCsv = () => {
     downloadCsv(`accounts-${period}.csv`, [
@@ -51,94 +63,117 @@ export default function Monthly() {
 
   return (
     <>
-      <PageHeader title={t('nav.month')} subtitle={t('mo.subtitle')}
-        actions={<>
-          <MonthPicker value={period} onChange={setPeriod} />
-          <IconButton icon={Download} label={t('exportCsv')} variant="secondary" onClick={exportCsv} />
-        </>} />
+      {/* Wing tabs: stay on top while scrolling, swipe sideways when there are many */}
+      <div className="sticky top-0 z-20 -mx-4 -mt-4 mb-3 shrink-0 bg-bg/90 px-4 pb-2 pt-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:mt-0 lg:bg-transparent lg:p-0 lg:pb-3 lg:backdrop-blur-none">
+        <div className="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto">
+          {tabs.map((o) => (
+            <button key={o.value} type="button" onClick={() => setWing(o.value)}
+              className={cx('h-10 shrink-0 snap-start rounded-xl px-4 text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer',
+                wing === o.value ? 'bg-accent text-white shadow-sm' : 'border border-fg/10 bg-surface text-muted hover:text-fg')}>
+              {o.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {/* Month totals */}
+      {/* Balance (all time) and this month's figures */}
       <Card className="@container mb-3 shrink-0 p-4 lg:mb-4">
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3 @min-[40rem]:grid-cols-5">
-          <Figure label={t('mo.collected')} value={sum(paid)} tone="text-ok" sub={t('mo.paidOf', { a: paid.length, b: paid.length + due.length })} />
-          <Figure label={t('mo.pending')} value={sum(due)} tone={due.length ? 'text-bad' : 'text-fg'} sub={t('mo.flatsLeft', { n: due.length })} />
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold text-muted">{t('dash.total')}{wing && ` · ${wing === 'common' ? t('common') : wingName(wing)}`}</p>
+            <p className={cx('truncate text-3xl font-bold tracking-tight', balance < 0 ? 'text-bad' : 'text-fg')}>
+              {lb ? <span className="shimmer inline-block h-8 w-36 rounded-lg" /> : <AnimatedNumber value={balance} />}
+            </p>
+          </div>
+          <IconTile icon={Wallet} tone="indigo" className="size-11" iconClass="size-6" />
+        </div>
+        <div className="mt-3 flex items-center gap-2 border-t border-fg/10 pt-3">
+          <MonthPicker value={period} onChange={setPeriod} className="min-w-0 flex-1" />
+          <IconButton icon={Download} label={t('exportCsv')} variant="secondary" onClick={exportCsv} />
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2.5 @min-[36rem]:grid-cols-4">
+          {wing !== 'common' && <Figure label={t('mo.collected')} value={sum(paid)} tone="text-ok" sub={t('mo.paidOf', { a: paid.length, b: paid.length + due.length })} />}
+          {wing !== 'common' && <Figure label={t('mo.pending')} value={sum(due)} tone={due.length ? 'text-bad' : 'text-fg'} sub={t('mo.flatsLeft', { n: due.length })} />}
           <Figure label={t('a.otherIncome')} value={income} tone="text-ok" />
           <Figure label={t('expenses')} value={expense} tone="text-bad" />
-          <div className="col-span-2 border-t border-fg/10 pt-3 @min-[40rem]:col-span-1 @min-[40rem]:border-0 @min-[40rem]:pt-0">
-            <Figure label={t('mo.balance')} value={balance} tone={balance < 0 ? 'text-bad' : 'text-fg'} sub={t('mo.balanceSub')} />
-          </div>
         </div>
       </Card>
 
-      <div className="grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-5 lg:gap-4">
-        {/* Maintenance: every flat and shop, paid or not */}
-        <ScrollCard className="lg:col-span-3" bodyClass="px-3 pb-3 sm:px-4 sm:pb-4"
-          header={<CardHead icon={ReceiptIndianRupee} title={t('mo.maintenance')}
-            actions={isAdmin && canCollect && <>
-              <IconButton icon={CalendarCog} label={t('bills.button')} variant="secondary" size="sm" className="size-9" onClick={() => forms.open('bills', { period })} />
-              <Button size="sm" variant="success" icon={Plus} onClick={() => forms.open('collect', { period })}>{t('collect.button')}</Button>
-            </>} />}>
-          {l1 ? <SkeletonTiles /> : !groups.length ? (
-            <EmptyState icon={ReceiptIndianRupee} title={t('mo.noUnits')} />
-          ) : (
-            <div className="space-y-5">
-              <Segmented value={view} onChange={setView} className="w-full sm:w-auto" options={[
-                { value: 'grid', label: <span className="flex items-center gap-1.5"><LayoutGrid className="size-4" />{t('mo.viewTiles')}</span> },
-                { value: 'list', label: <span className="flex items-center gap-1.5"><Rows3 className="size-4" />{t('mo.viewList')}</span> },
-              ]} />
-              {groups.map(({ wing: w, items }) => {
-                const left = items.filter((r) => r.status === 'due')
-                return (
-                  <section key={w.id}>
-                    {groups.length > 1 && (
-                      <div className="mb-2 flex items-baseline justify-between gap-2 px-0.5">
-                        <h3 className="truncate text-base font-bold text-fg">{w.name}</h3>
-                        <span className="shrink-0 text-xs text-muted">
-                          {t('mo.paidOf', { a: items.filter((r) => r.status === 'paid').length, b: items.filter((r) => r.status !== 'none').length })}
-                          {left.length > 0 && <span className="text-bad"> · {inr(sum(left))} {t('unpaid')}</span>}
-                        </span>
-                      </div>
-                    )}
-                    <div className="space-y-2.5">
-                      {byFloor(items).map((f, fi) => {
-                        const c = FLOOR_COLORS[fi % FLOOR_COLORS.length]
-                        return (
-                          <div key={f.key} className={cx('rounded-xl border-l-4 p-2 sm:p-2.5', c.band)}>
-                            <div className="mb-2 flex items-center justify-between gap-2">
-                              <span className={cx('inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-bold text-white', c.pill)}>
-                                {f.key === 'shop' ? <Store className="size-4" /> : <Layers className="size-4" />}
-                                {f.key === 'shop' ? t('shops') : f.key === 'other' ? t('mo.others') : t('mo.floor', { n: f.key })}
-                              </span>
-                              <span className="text-xs font-semibold text-muted">{t('mo.paidOf', { a: f.items.filter((r) => r.status === 'paid').length, b: f.items.filter((r) => r.status !== 'none').length })}</span>
+      <div className={cx('grid gap-3 lg:min-h-0 lg:flex-1 lg:gap-4', wing !== 'common' && 'lg:grid-cols-5')}>
+        {/* Maintenance: every flat and shop, floor by floor */}
+        {wing !== 'common' && (
+          <ScrollCard className="lg:col-span-3" bodyClass="px-3 pb-3 sm:px-4 sm:pb-4"
+            header={(
+              <div className="flex shrink-0 items-center gap-2 p-3 sm:p-4">
+                <Segmented value={view} onChange={setView} className="h-10 min-w-0" options={[
+                  { value: 'grid', label: <span className="flex items-center gap-1.5"><LayoutGrid className="size-4" />{t('mo.viewTiles')}</span> },
+                  { value: 'list', label: <span className="flex items-center gap-1.5"><Rows3 className="size-4" />{t('mo.viewList')}</span> },
+                ]} />
+                {isAdmin && canCollect && <div className="ml-auto flex shrink-0 items-center gap-2">
+                  <IconButton icon={CalendarCog} label={t('bills.button')} variant="secondary" size="sm" className="size-10" onClick={() => forms.open('bills', { period })} />
+                  <Button size="sm" variant="success" icon={Plus} className="h-10" onClick={() => forms.open('collect', { period })}>{t('collect.short')}</Button>
+                </div>}
+              </div>
+            )}>
+            {l1 ? <SkeletonTiles /> : !groups.length ? (
+              <EmptyState icon={Layers} title={t('mo.noUnits')} />
+            ) : (
+              <div className="space-y-5">
+                {groups.map(({ wing: w, items }) => {
+                  const left = items.filter((r) => r.status === 'due')
+                  return (
+                    <section key={w.id}>
+                      {groups.length > 1 && (
+                        <div className="mb-2 flex items-baseline justify-between gap-2 px-0.5">
+                          <h3 className="truncate text-base font-bold text-fg">{w.name}</h3>
+                          {left.length > 0 && <span className="shrink-0 text-xs font-semibold text-bad">{inr(sum(left))} {t('unpaid')}</span>}
+                        </div>
+                      )}
+                      <div className="space-y-2.5">
+                        {byFloor(items).map((f, fi) => {
+                          const c = FLOOR_COLORS[fi % FLOOR_COLORS.length]
+                          return (
+                            <div key={f.key} className={cx('rounded-xl border-l-4 p-2 sm:p-2.5', c.band)}>
+                              <div className="mb-2 flex items-center justify-between gap-2">
+                                <span className={cx('inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-bold text-white', c.pill)}>
+                                  {f.key === 'shop' ? <Store className="size-4" /> : <Layers className="size-4" />}
+                                  {f.key === 'shop' ? t('shops') : f.key === 'other' ? t('mo.others') : t('mo.floor', { n: f.key })}
+                                </span>
+                                <span className="text-xs font-semibold text-muted">{t('mo.paidOf', { a: f.items.filter((r) => r.status === 'paid').length, b: f.items.filter((r) => r.status !== 'none').length })}</span>
+                              </div>
+                              {view === 'list' ? (
+                                <div className="space-y-1.5">
+                                  {f.items.map((r, i) => <UnitRow key={r.id} row={r} index={i} editable={canEdit(r.wingId)}
+                                    onClick={() => forms.open('payment', { due: r.due, unit: r.unit, period })} />)}
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))]">
+                                  {f.items.map((r, i) => <UnitTile key={r.id} row={r} index={i} editable={canEdit(r.wingId)}
+                                    onClick={() => forms.open('payment', { due: r.due, unit: r.unit, period })} />)}
+                                </div>
+                              )}
                             </div>
-                            {view === 'list' ? (
-                              <div className="space-y-1.5">
-                                {f.items.map((r, i) => <UnitRow key={r.id} row={r} index={i} editable={canEdit(r.wingId)}
-                                  onClick={() => forms.open('payment', { due: r.due, unit: r.unit, period })} />)}
-                              </div>
-                            ) : (
-                              <div className="grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))]">
-                                {f.items.map((r, i) => <UnitTile key={r.id} row={r} index={i} editable={canEdit(r.wingId)}
-                                  onClick={() => forms.open('payment', { due: r.due, unit: r.unit, period })} />)}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </section>
-                )
-              })}
-            </div>
-          )}
-        </ScrollCard>
+                          )
+                        })}
+                      </div>
+                    </section>
+                  )
+                })}
+              </div>
+            )}
+          </ScrollCard>
+        )}
 
         {/* Other income and expenses for the month */}
-        <ScrollCard className="lg:col-span-2"
-          header={<CardHead icon={Wallet} title={t('mo.entries')}
-            actions={isAdmin && <Button size="sm" icon={Plus} onClick={() => forms.open('entry', { type: 'expense', period })}>{t('add')}</Button>} />}>
+        <ScrollCard className={cx(wing !== 'common' && 'lg:col-span-2')}
+          header={(
+            <div className="flex shrink-0 items-center gap-2 px-4 pb-2 pt-3">
+              <h2 className="min-w-0 flex-1 truncate text-sm font-semibold text-muted">{t('mo.entries')}</h2>
+              {isAdmin && <Button size="sm" icon={Plus} className="h-10" onClick={() => forms.open('entry', { type: 'expense', period, wingId: wing === 'common' ? '' : wing || undefined })}>{t('add')}</Button>}
+            </div>
+          )}>
           {l2 ? <SkeletonList /> : !list.length ? (
-            <EmptyState icon={Wallet} title={t('a.empty')} text={isAdmin ? t('a.emptyAdmin') : t('a.emptyViewer')} />
+            <EmptyState icon={Wallet} title={t('a.empty')} />
           ) : (
             <div className="divide-y divide-fg/[0.06]">
               {list.map((x, i) => {
@@ -151,7 +186,7 @@ export default function Monthly() {
                     <IconTile icon={categoryIcon(x.category)} tone={isIn ? 'green' : 'red'} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-fg">{tv(x.category)}</p>
-                      <p className="truncate text-xs text-muted">{[shortDate(x.date), wingName(x.wingId), x.description].filter(Boolean).join(' · ')}</p>
+                      <p className="truncate text-xs text-muted">{[shortDate(x.date), !wing && wingName(x.wingId), x.description].filter(Boolean).join(' · ')}</p>
                     </div>
                     <p className={cx('shrink-0 font-bold', isIn ? 'text-ok' : 'text-fg')}>{isIn ? '+' : '−'}{inr(x.amount)}</p>
                   </motion.div>
@@ -193,16 +228,6 @@ function Figure({ label, value, tone, sub }) {
       <p className="truncate text-xs font-semibold text-muted">{label}</p>
       <p className={cx('truncate text-lg font-bold sm:text-xl', tone)}>{inr(value)}</p>
       {sub && <p className="truncate text-xs text-subtle">{sub}</p>}
-    </div>
-  )
-}
-
-function CardHead({ icon: Icon, title, actions }) {
-  return (
-    <div className="flex shrink-0 items-center gap-2.5 px-4 pb-3 pt-4">
-      <Icon className="size-5 shrink-0 text-accent-ink" />
-      <h2 className="min-w-0 flex-1 truncate font-semibold text-fg">{title}</h2>
-      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </div>
   )
 }

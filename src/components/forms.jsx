@@ -12,7 +12,7 @@ import { auth, db, createLogin, toLoginEmail, toLoginId, isRealEmail, APP_NAME }
 import { useAuth, roleLabel } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { useQuery } from '../hooks/useQuery'
-import { inr, today, dateLabel, currentPeriod, shiftPeriod, periodLabel, PAYMENT_MODES, EXPENSE_CATEGORIES, INCOME_CATEGORIES, byNumber } from '../lib/format'
+import { inr, today, dateLabel, defaultPeriod, shiftPeriod, periodLabel, PAYMENT_MODES, EXPENSE_CATEGORIES, INCOME_CATEGORIES, byNumber } from '../lib/format'
 import { recordPayment, markUnpaid, deleteDue, saveEntry, deleteEntry, restoreEntry, dueId, planUnits, createUnits, createWingWithUnits, updateWingMaintenance, saveMonthBills } from '../lib/actions'
 import { periodOf } from '../lib/ledger'
 import { MODE_ICONS, categoryIcon } from '../lib/icons'
@@ -149,7 +149,7 @@ function MoreSheet({ onClose }) {
 }
 
 /* ================= Collect payment: pick a unit that still owes ================= */
-function CollectSheet({ onClose, period = currentPeriod() }) {
+function CollectSheet({ onClose, period = defaultPeriod() }) {
   const { canEdit } = useAuth()
   const { units, wings } = useData()
   const [wing, setWing] = useState('')
@@ -282,7 +282,7 @@ function EntryForm({ entry, type: initType = 'expense', wingId: initWing, period
   ]
   const [f, setF] = useState(entry
     ? { ...entry, amount: String(entry.amount), period: periodOf(entry) }
-    : { type: initType, wingId: initWing !== undefined && wingOptions.some((o) => o.value === initWing) ? initWing : wingOptions[0]?.value ?? '', category: (initType === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES)[0], amount: '', period: initPeriod || currentPeriod(), date: today(), mode: 'Cash', description: '' })
+    : { type: initType, wingId: initWing !== undefined && wingOptions.some((o) => o.value === initWing) ? initWing : wingOptions[0]?.value ?? '', category: (initType === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES)[0], amount: '', period: initPeriod || defaultPeriod(), date: today(), mode: 'Cash', description: '' })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const cats = f.type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES
@@ -805,7 +805,7 @@ function ChangePasswordForm({ onClose }) {
 }
 
 /* ================= Monthly bills: amount can be different every month ================= */
-function BillsForm({ period = currentPeriod(), onClose }) {
+function BillsForm({ period = defaultPeriod(), onClose }) {
   const { canEdit } = useAuth()
   const { units, wings } = useData()
   const prev = shiftPeriod(period, -1)

@@ -12,6 +12,9 @@ export const currentPeriod = () => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`
 }
 
+/** Accounts are settled a month later, so screens and forms start on last month */
+export const defaultPeriod = () => shiftPeriod(currentPeriod(), -1)
+
 /** "YYYY-MM-DD" for today minus n days */
 export const daysAgo = (n) => {
   const d = new Date()
