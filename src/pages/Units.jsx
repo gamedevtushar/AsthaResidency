@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { Plus, Pencil, Building2, Store, Home, Layers, Trash2 } from 'lucide-react'
-import { deleteDoc, doc } from 'firebase/firestore'
-import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { inr, sum } from '../lib/format'
+import { deleteWing } from '../lib/actions'
 import { t } from '../i18n'
 import { Button, Card, EmptyState, Menu, PageHeader, ScrollCard, Segmented, Spinner, confirmDialog, cx, reveal, toast } from '../components/ui'
 import { SearchBox } from '../components/filters'
@@ -31,9 +30,9 @@ export default function Units() {
   const canAddUnit = wings.some((w) => canEdit(w.id))
 
   const removeWing = async (w) => {
-    if (units.some((u) => u.wingId === w.id)) return toast.warning(t('u.removeUnitsFirst'), { title: w.name })
-    if (!(await confirmDialog({ message: t('u.confirmDeleteWing', { n: w.name }), confirmText: t('delete') }))) return
-    try { await deleteDoc(doc(db, 'wings', w.id)); setWingTab(''); toast.success(t('u.wingDeleted'), { title: w.name }) } catch (e) { toast.error(e) }
+    const wu = units.filter((u) => u.wingId === w.id)
+    if (!(await confirmDialog({ message: t('u.confirmDeleteWing', { n: w.name, c: wu.length }), confirmText: t('delete') }))) return
+    try { await deleteWing(w, wu); setWingTab(''); toast.success(t('u.wingDeleted'), { title: w.name }) } catch (e) { toast.error(e) }
   }
 
   return (

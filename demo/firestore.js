@@ -72,6 +72,7 @@ export function writeBatch() {
   return {
     set: (ref, data) => ops.push(() => upsert(ref, data, false)),
     update: (ref, data) => ops.push(() => upsert(ref, data, true)),
+    delete: (ref) => ops.push(() => remove(ref)),
     commit: async () => { await delay(400); ops.forEach((op) => op()); notify() },
   }
 }

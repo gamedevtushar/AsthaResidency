@@ -40,7 +40,7 @@ function Logo() {
 
 export default function Layout() {
   const { profile, isLoggedIn, isSuper, isAdmin, signOut } = useAuth()
-  const { wingName } = useData()
+  const { wings, wingName } = useData()
   const location = useLocation()
   const navigate = useNavigate()
   const outlet = useOutlet()
@@ -115,13 +115,12 @@ export default function Layout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Phone top bar */}
-        <header className="z-30 flex shrink-0 items-center justify-between gap-3 border-b border-bar-line bg-bar px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] lg:hidden">
-          <Logo />
-          <button type="button" aria-label={t('more')} onClick={() => forms.open('more')} className="shrink-0 cursor-pointer">
-            {isLoggedIn
-              ? <Avatar profile={profile} className="size-10" />
-              : <span className="flex size-10 items-center justify-center rounded-xl bg-bar-pill text-muted"><MenuIcon className="size-5" /></span>}
-          </button>
+        {/* Slim phone top bar: logo and name (plus the wing when there is only one). Menu lives in the bottom bar. */}
+        <header className="z-30 flex shrink-0 items-center gap-2 border-b border-bar-line bg-bar px-4 pb-1.5 pt-[calc(0.375rem+env(safe-area-inset-top))] lg:hidden">
+          <LogoMark className="size-7 shrink-0" />
+          <p className="min-w-0 truncate text-[0.9375rem] font-bold text-fg">
+            {APP_NAME}{wings.length === 1 && <span className="font-semibold text-muted"> – {wings[0].name}</span>}
+          </p>
         </header>
 
         {/* The only scroll area. Desktop pages use a fixed frame and scroll inside their cards. */}

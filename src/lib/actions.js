@@ -81,6 +81,13 @@ export async function createWingWithUnits(name, units) {
   return ref.id
 }
 
+/** Delete a wing with all its flats / shops and their phone numbers. Past payments and entries are kept. */
+export async function deleteWing(wing, units) {
+  await inBatches(units, (b, u) => { b.delete(doc(db, 'units', u.id)); if (u.phone) b.delete(doc(db, 'unitContacts', u.id)) })
+  await deleteDoc(doc(db, 'wings', wing.id))
+  changed()
+}
+
 /** Set the monthly maintenance for every flat / shop in a wing */
 export const updateWingMaintenance = (units, { flatAmount, shopAmount }) =>
   inBatches(

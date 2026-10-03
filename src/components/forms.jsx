@@ -13,7 +13,7 @@ import { useAuth, roleLabel } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { useQuery } from '../hooks/useQuery'
 import { inr, today, dateLabel, defaultPeriod, shiftPeriod, periodLabel, PAYMENT_MODES, EXPENSE_CATEGORIES, INCOME_CATEGORIES, byNumber } from '../lib/format'
-import { recordPayment, markUnpaid, deleteDue, saveEntry, deleteEntry, restoreEntry, dueId, planUnits, createUnits, createWingWithUnits, updateWingMaintenance, saveMonthBills } from '../lib/actions'
+import { recordPayment, markUnpaid, deleteDue, deleteWing, saveEntry, deleteEntry, restoreEntry, dueId, planUnits, createUnits, createWingWithUnits, updateWingMaintenance, saveMonthBills } from '../lib/actions'
 import { periodOf } from '../lib/ledger'
 import { MODE_ICONS, categoryIcon } from '../lib/icons'
 import { t, tv, LangSwitch } from '../i18n'
@@ -170,7 +170,7 @@ function CollectSheet({ onClose, period = defaultPeriod() }) {
   return (
     <Modal onClose={onClose} size="lg" icon={ReceiptIndianRupee} iconTone="green"
       title={t('collect.title', { month: periodLabel(period) })} subtitle={t('collect.subtitle', { n: pending.length })}>
-      <div className="sticky top-0 z-10 -mx-1 mb-3 space-y-2.5 bg-transparent px-1">
+      <div className="sticky -top-1 z-10 -mx-1 mb-3 space-y-2.5 bg-surface px-1 pb-2 pt-1">
         <SearchBox value={q} onChange={setQ} placeholder={t('m.search')} />
         {myWings.length > 1 && (
           <Chips scroll value={wing} onChange={setWing} options={[{ value: '', label: t('allWings') }, ...myWings.map((w) => ({ value: w.id, label: w.name }))]} />
@@ -212,7 +212,7 @@ function PaymentForm({ due, unit, period, returnTo, onClose }) {
   const number = due?.number ?? unit.number
   const owner = due?.ownerName ?? unit?.ownerName
   const wasPaid = due?.status === 'paid'
-  const [f, setF] = useState({ amount: String(due?.amount ?? unit?.maintenance ?? ''), paidOn: due?.paidOn || today(), mode: due?.mode || 'UPI', note: due?.note || '' })
+  const [f, setF] = useState({ amount: String(due?.amount ?? unit?.maintenance ?? ''), paidOn: due?.paidOn || today(), mode: due?.mode || 'Cash', note: due?.note || '' })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const editable = canEdit(due?.wingId ?? unit?.wingId)
@@ -551,9 +551,8 @@ function WingEditForm({ wing, onClose }) {
     } catch (err) { toast.error(err); setBusy(false) }
   }
   const remove = async () => {
-    if (wu.length) return toast.warning(t('u.removeUnitsFirst'), { title: wing.name })
-    if (!(await confirmDialog({ message: t('u.confirmDeleteWing', { n: wing.name }), confirmText: t('delete') }))) return
-    try { await deleteDoc(doc(db, 'wings', wing.id)); toast.success(t('u.wingDeleted'), { title: wing.name }); onClose() } catch (err) { toast.error(err) }
+    if (!(await confirmDialog({ message: t('u.confirmDeleteWing', { n: wing.name, c: wu.length }), confirmText: t('delete') }))) return
+    try { await deleteWing(wing, wu); toast.success(t('u.wingDeleted'), { title: wing.name }); onClose() } catch (err) { toast.error(err) }
   }
 
   return (
