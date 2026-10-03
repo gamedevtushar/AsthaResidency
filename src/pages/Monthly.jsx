@@ -28,8 +28,7 @@ export default function Monthly() {
   const [picked, setWing] = useState(profile?.role === 'wing_admin' ? profile.wingId : '')
   const wing = wings.some((w) => w.id === picked) ? picked : wings[0]?.id || ''
   const months = useMemo(() => [period], [period])
-  const [view, setViewState] = useState(() => { try { return localStorage.getItem('flatView') === 'list' ? 'list' : 'map' } catch { return 'map' } })
-  const setView = (v) => { setViewState(v); try { localStorage.setItem('flatView', v) } catch { /* storage unavailable */ } }
+  const [view, setView] = useState('map') // building view first, list on request
   // Admins record a payment; everyone else just sees the details
   const pick = (r) => (canEdit(r.wingId)
     ? forms.open('payment', { due: r.due, unit: r.unit, period })
@@ -107,7 +106,7 @@ export default function Monthly() {
                   </button>
                 ))}
               </div>
-              <p className="min-w-0 flex-1 truncate text-xs font-semibold text-muted">{t('mo.paidOf', { a: paid.length, b: paid.length + due.length })}</p>
+              <div className="flex-1" />
               {isAdmin && canEdit(wing) && <>
                 <IconButton icon={CalendarCog} label={t('bills.button')} variant="secondary" size="sm" className="size-9" onClick={() => forms.open('bills', { period })} />
                 <Button size="sm" variant="success" icon={Plus} onClick={() => forms.open('collect', { period })}>{t('collect.short')}</Button>
@@ -185,43 +184,38 @@ export default function Monthly() {
 }
 
 /**
- * Building view, like a seat map: top floor at the top, shops at the bottom.
- * Every flat is one small box coloured by status, so a whole wing fits on one screen.
+ * Building view, like a seat map: top floor at the top, shops at the bottom, one row per floor.
+ * Each box shows the flat number and the amount paid (₹0 while pending), so a whole wing fits on one screen.
  */
 function SeatMap({ rows, onPick }) {
   const floors = byFloor(rows)
   const numbered = floors.filter((f) => f.key !== 'shop' && f.key !== 'other')
   const building = [...[...numbered].reverse(), ...floors.filter((f) => f.key === 'other'), ...floors.filter((f) => f.key === 'shop')]
-  const cols = Math.min(8, Math.max(...building.map((f) => f.items.length)))
+  const cols = Math.min(6, Math.max(...building.map((f) => f.items.length)))
   const label = (r) => (r.type === 'shop' ? String(r.number).replace(/^.*?shop\s*/i, 'S') : String(r.number).replace(/^[^\d]*?-\s*/, ''))
   return (
-    <div>
-      <div className="space-y-1.5">
-        {building.map((f) => {
-          const c = FLOOR_COLORS[Math.max(0, numbered.indexOf(f)) % FLOOR_COLORS.length] // same colour as in the list view
-          return (
-            <div key={f.key} className="flex items-stretch gap-1.5">
-              <div className={cx('flex w-7 shrink-0 items-center justify-center rounded-md text-xs font-bold text-white', f.key === 'shop' ? 'bg-amber-600' : f.key === 'other' ? 'bg-slate-500' : c.pill)}>
-                {f.key === 'shop' ? <Store className="size-3.5" /> : f.key === 'other' ? '•' : f.key}
-              </div>
-              <div className="grid min-w-0 flex-1 gap-1.5" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-                {f.items.map((r) => (
-                  <button key={r.id} type="button" onClick={() => onPick(r)} title={`${r.number} · ${r.ownerName}`}
-                    className={cx('flex h-10 min-w-0 items-center justify-center rounded-md text-xs font-bold tabular-nums transition-transform active:scale-95 cursor-pointer',
-                      r.status === 'paid' ? 'bg-emerald-600 text-white' : r.status === 'due' ? 'border border-bad/50 bg-bad/12 text-bad' : 'border border-fg/10 bg-fg/[0.04] text-subtle')}>
-                    <span className="truncate px-0.5">{label(r)}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-      <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted">
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-emerald-600" />{t('paid')}</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm border border-bad/50 bg-bad/12" />{t('unpaid')}</span>
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm border border-fg/10 bg-fg/[0.04]" />{t('mo.notDue')}</span>
-      </div>
+    <div className="space-y-2">
+      {building.map((f, fi) => (
+        <motion.div key={f.key} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fi * 0.04 }}
+          className={cx('grid gap-2', f.key === 'shop' && 'mt-3 border-t border-dashed border-fg/15 pt-3')}
+          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          {f.items.map((r) => {
+            const paid = r.status === 'paid'
+            const due = r.status === 'due'
+            return (
+              <button key={r.id} type="button" onClick={() => onPick(r)} title={`${r.number} · ${r.ownerName}`}
+                className={cx('flex min-w-0 flex-col items-center justify-center rounded-xl py-2 leading-tight tabular-nums shadow-sm transition-transform active:scale-95 cursor-pointer',
+                  paid ? 'bg-gradient-to-b from-emerald-500 to-emerald-700 text-white shadow-emerald-900/30'
+                    : due ? 'border border-bad/40 bg-bad/10 text-bad' : 'border border-fg/10 bg-fg/[0.04] text-subtle')}>
+                <span className="flex max-w-full items-center gap-1 truncate px-1 text-sm font-bold">
+                  {r.type === 'shop' && <Store className="size-3.5 shrink-0" />}{label(r)}
+                </span>
+                <span className={cx('max-w-full truncate px-1 text-[0.6875rem] font-semibold', paid ? 'text-white/85' : 'opacity-80')}>{inrShort(paid ? r.amount : 0)}</span>
+              </button>
+            )
+          })}
+        </motion.div>
+      ))}
     </div>
   )
 }
