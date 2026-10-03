@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* dark: follows the app theme switch (data-theme), not only the phone setting */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
 /* Theme colours are CSS variables, so one class works in both light and dark mode.
    Use text-fg / text-muted / text-subtle for text, bg-fg/5 style tints for surfaces,
    accent for the brand colour and ok / bad / warn / info for status.

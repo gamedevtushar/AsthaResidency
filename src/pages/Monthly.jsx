@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { collection, query, where } from 'firebase/firestore'
-import { Download, Plus, CheckCircle2, CalendarCog, Store, Wallet, ReceiptIndianRupee } from 'lucide-react'
+import { Download, Plus, CheckCircle2, CalendarCog, Store, Wallet, ReceiptIndianRupee, Layers } from 'lucide-react'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
@@ -93,9 +93,23 @@ export default function Monthly() {
                         </span>
                       </div>
                     )}
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-2 sm:grid-cols-[repeat(auto-fill,minmax(7.5rem,1fr))] sm:gap-2.5">
-                      {items.map((r, i) => <UnitTile key={r.id} row={r} index={i} editable={canEdit(r.wingId)}
-                        onClick={() => forms.open('payment', { due: r.due, unit: r.unit, period })} />)}
+                    <div className="space-y-2.5">
+                      {byFloor(items).map((f, fi) => {
+                        const c = FLOOR_COLORS[fi % FLOOR_COLORS.length]
+                        return (
+                          <div key={f.key} className={cx('rounded-xl border-l-4 p-1.5 sm:p-2.5', c.band)}>
+                            <p className={cx('mb-1.5 flex items-center gap-1.5 px-0.5 text-xs font-bold', c.text)}>
+                              {f.key === 'shop' ? <Store className="size-3.5" /> : <Layers className="size-3.5" />}
+                              {f.key === 'shop' ? t('shops') : f.key === 'other' ? t('mo.others') : t('mo.floor', { n: f.key })}
+                              <span className="font-medium text-muted">· {t('mo.paidOf', { a: f.items.filter((r) => r.status === 'paid').length, b: f.items.filter((r) => r.status !== 'none').length })}</span>
+                            </p>
+                            <div className="grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-1.5 sm:grid-cols-[repeat(auto-fill,minmax(7.5rem,1fr))] sm:gap-2">
+                              {f.items.map((r, i) => <UnitTile key={r.id} row={r} index={i} editable={canEdit(r.wingId)}
+                                onClick={() => forms.open('payment', { due: r.due, unit: r.unit, period })} />)}
+                            </div>
+                          </div>
+                        )
+                      })}
                     </div>
                   </section>
                 )
@@ -134,6 +148,28 @@ export default function Monthly() {
       </div>
     </>
   )
+}
+
+/** Each floor gets its own colour band so flats are easy to tell apart */
+const FLOOR_COLORS = [
+  { band: 'border-sky-500/70 bg-sky-500/[0.06]', text: 'text-sky-600 dark:text-sky-400' },
+  { band: 'border-violet-500/70 bg-violet-500/[0.06]', text: 'text-violet-600 dark:text-violet-400' },
+  { band: 'border-amber-500/70 bg-amber-500/[0.06]', text: 'text-amber-600 dark:text-amber-400' },
+  { band: 'border-teal-500/70 bg-teal-500/[0.06]', text: 'text-teal-600 dark:text-teal-400' },
+  { band: 'border-pink-500/70 bg-pink-500/[0.06]', text: 'text-pink-600 dark:text-pink-400' },
+  { band: 'border-lime-500/70 bg-lime-500/[0.06]', text: 'text-lime-600 dark:text-lime-400' },
+]
+
+/** Group a wing's units by floor: "A-203" → floor 2, shops together, anything else under "others" */
+function byFloor(items) {
+  const groups = new Map()
+  for (const r of items) {
+    const n = Number(String(r.number).match(/(\d+)\s*$/)?.[1])
+    const key = r.type === 'shop' ? 'shop' : n >= 100 ? String(Math.floor(n / 100)) : 'other'
+    groups.set(key, [...(groups.get(key) || []), r])
+  }
+  const order = (k) => (k === 'shop' ? -1 : k === 'other' ? 1e9 : Number(k))
+  return [...groups].sort((a, b) => order(a[0]) - order(b[0])).map(([key, list]) => ({ key, items: list }))
 }
 
 function Figure({ label, value, tone, sub }) {
