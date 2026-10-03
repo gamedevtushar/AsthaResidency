@@ -116,18 +116,18 @@ export default function Layout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Phone top bar */}
-        <header className="z-30 flex shrink-0 items-center justify-between gap-3 border-b border-fg/10 bg-surface/85 px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] backdrop-blur-xl lg:hidden">
+        <header className="z-30 flex shrink-0 items-center justify-between gap-3 border-b border-bar-line bg-bar px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] lg:hidden">
           <Logo />
           <button type="button" aria-label={t('more')} onClick={() => forms.open('more')} className="shrink-0 cursor-pointer">
             {isLoggedIn
               ? <Avatar profile={profile} className="size-10" />
-              : <span className="flex size-10 items-center justify-center rounded-xl border border-fg/12 text-muted"><MenuIcon className="size-5" /></span>}
+              : <span className="flex size-10 items-center justify-center rounded-xl bg-bar-pill text-muted"><MenuIcon className="size-5" /></span>}
           </button>
         </header>
 
         {/* The only scroll area. Desktop pages use a fixed frame and scroll inside their cards. */}
         <main className="no-scrollbar min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col px-4 pb-32 pt-4 sm:px-6 lg:h-full lg:min-h-0 lg:px-8 lg:pb-6 lg:pt-6">
+          <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col px-4 pb-6 pt-4 sm:px-6 lg:h-full lg:min-h-0 lg:px-8 lg:pb-6 lg:pt-6">
             <AnimatePresence mode="wait">
               <motion.div key={location.pathname} variants={pageVariants} initial="hidden" animate="show" exit="exit"
                 className="flex flex-1 flex-col lg:min-h-0">
@@ -136,38 +136,38 @@ export default function Layout() {
             </AnimatePresence>
           </div>
         </main>
-      </div>
 
-      {/* Phone bottom bar */}
-      <nav className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-30 lg:hidden">
-        <div className="glass-strong grid grid-cols-5 items-end rounded-2xl p-1.5">
-          {mobileTabs.map((item) => {
-            if (item.fab) return (
-              <div key="fab" className="flex justify-center">
-                <motion.button type="button" aria-label={t('quickAdd')} whileTap={{ scale: 0.9 }} onClick={() => forms.open('quickAdd')}
-                  className="-mt-7 mb-1 flex size-14 items-center justify-center rounded-2xl bg-accent text-white shadow-lg ring-4 ring-bg cursor-pointer">
-                  <Plus className="size-7" />
-                </motion.button>
-              </div>
-            )
-            if (item.more) return (
-              <button key="more" type="button" onClick={() => forms.open('more')} className="flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-medium text-muted cursor-pointer">
-                <MenuIcon className="size-[22px]" /><span>{t('more')}</span>
-              </button>
-            )
-            const { to, key, icon: Icon, end } = item
-            return (
-              <NavLink key={to} to={to} end={end} className="relative flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-medium">
-                {({ isActive }) => <>
-                  {isActive && <motion.span layoutId="bottom-active" transition={spring} className="absolute inset-0 rounded-xl bg-accent/10" />}
-                  <Icon className={cx('relative size-[22px]', isActive ? 'text-accent-ink' : 'text-muted')} />
-                  <span className={cx('relative max-w-full truncate px-0.5', isActive ? 'font-semibold text-accent-ink' : 'text-muted')}>{t(`nav.${key}Short`)}</span>
-                </>}
-              </NavLink>
-            )
-          })}
-        </div>
-      </nav>
+        {/* Phone bottom bar: docked under the scroll area, so nothing shows beneath it */}
+        <nav className="z-30 shrink-0 border-t border-bar-line bg-bar pb-[env(safe-area-inset-bottom)] lg:hidden">
+          <div className="mx-auto grid max-w-lg grid-cols-5 items-center gap-1 px-2 py-1.5">
+            {mobileTabs.map((item) => {
+              if (item.fab) return (
+                <div key="fab" className="flex justify-center">
+                  <motion.button type="button" aria-label={t('quickAdd')} whileTap={{ scale: 0.9 }} onClick={() => forms.open('quickAdd')}
+                    className="flex size-12 items-center justify-center rounded-2xl bg-accent text-white shadow-md shadow-accent/30 cursor-pointer">
+                    <Plus className="size-6" />
+                  </motion.button>
+                </div>
+              )
+              if (item.more) return (
+                <button key="more" type="button" onClick={() => forms.open('more')} className="flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-medium text-muted cursor-pointer">
+                  <MenuIcon className="size-[22px]" /><span>{t('more')}</span>
+                </button>
+              )
+              const { to, key, icon: Icon, end } = item
+              return (
+                <NavLink key={to} to={to} end={end} className="relative flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-medium">
+                  {({ isActive }) => <>
+                    {isActive && <motion.span layoutId="bottom-active" transition={spring} className="absolute inset-0 rounded-xl bg-bar-pill" />}
+                    <Icon className={cx('relative size-[22px]', isActive ? 'text-accent-ink' : 'text-muted')} />
+                    <span className={cx('relative max-w-full truncate px-0.5', isActive ? 'font-semibold text-accent-ink' : 'text-muted')}>{t(`nav.${key}Short`)}</span>
+                  </>}
+                </NavLink>
+              )
+            })}
+          </div>
+        </nav>
+      </div>
     </div>
   )
 }

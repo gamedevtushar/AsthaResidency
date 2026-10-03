@@ -2,7 +2,8 @@
 
 /* Theme colours are CSS variables, so one class works in both light and dark mode.
    Use text-fg / text-muted / text-subtle for text, bg-fg/5 style tints for surfaces,
-   accent for the brand colour and ok / bad / warn / info for status. */
+   accent for the brand colour and ok / bad / warn / info for status.
+   bar / bar-line / bar-pill colour the phone top and bottom bars so they stand apart from the page. */
 @theme {
   --font-sans: "Inter", "Noto Sans Gujarati", ui-sans-serif, system-ui, sans-serif;
 
@@ -17,6 +18,9 @@
   --color-bad: var(--c-bad);
   --color-warn: var(--c-warn);
   --color-info: var(--c-info);
+  --color-bar: var(--c-bar);
+  --color-bar-line: var(--c-bar-line);
+  --color-bar-pill: var(--c-bar-pill);
 
   --animate-shimmer: shimmer 1.6s linear infinite;
   --animate-spin-slow: spin 1s linear infinite;
@@ -40,6 +44,9 @@
   --c-bad: #be123c;
   --c-warn: #b45309;
   --c-info: #0369a1;
+  --c-bar: #e3e7fd;
+  --c-bar-line: rgb(79 70 229 / 0.16);
+  --c-bar-pill: #ffffff;
   --glass-bg: rgb(255 255 255 / 0.82);
   --glass-strong-bg: rgb(255 255 255 / 0.97);
   --glass-border: rgb(15 23 42 / 0.08);
@@ -59,6 +66,9 @@
   --c-bad: #fb7185;
   --c-warn: #fbbf24;
   --c-info: #38bdf8;
+  --c-bar: #1b2046;
+  --c-bar-line: rgb(129 140 248 / 0.18);
+  --c-bar-pill: rgb(99 102 241 / 0.24);
   --glass-bg: rgb(20 29 47 / 0.78);
   --glass-strong-bg: rgb(20 29 47 / 0.98);
   --glass-border: rgb(148 163 184 / 0.13);

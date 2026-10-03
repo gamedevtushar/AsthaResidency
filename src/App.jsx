@@ -48,7 +48,7 @@ export default function App() {
       <ConfirmHost />
       <OfflineBanner />
       {import.meta.env.VITE_DEMO && (
-        <div className="pointer-events-none fixed bottom-[5.5rem] right-3 z-20 rounded-full border border-warn/30 bg-warn/10 px-2.5 py-1 text-[10px] font-semibold text-warn backdrop-blur-md lg:bottom-3 lg:right-4">
+        <div className="pointer-events-none fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-20 rounded-full border border-warn/30 bg-warn/10 px-2.5 py-1 text-[10px] font-semibold text-warn backdrop-blur-md lg:bottom-3 lg:right-4">
           {t('demo.badge')}
         </div>
       )}

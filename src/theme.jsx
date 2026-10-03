@@ -15,7 +15,7 @@ const resolve = (pref) => (pref === 'system' ? (media.matches ? 'dark' : 'light'
 export function applyTheme() {
   const theme = resolve(getThemePref())
   document.documentElement.dataset.theme = theme
-  document.querySelector('meta[name=theme-color]')?.setAttribute('content', theme === 'dark' ? '#0b1120' : '#eef2f7')
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', theme === 'dark' ? '#1b2046' : '#e3e7fd')
 }
 
 export function setThemePref(pref) {
