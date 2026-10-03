@@ -103,8 +103,8 @@ export default function Reports() {
               className="grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:gap-4">
               <div className={cx(panel, 'lg:col-span-2')}>
                 <div className="no-scrollbar min-h-0 flex-1 overflow-auto">
-                  <table className="w-full min-w-[580px] text-sm">
-                    <thead className="sticky top-0 z-10 bg-surface/90 text-[11px] uppercase tracking-wider text-muted backdrop-blur-md">
+                  <table className="w-full min-w-[36rem] whitespace-nowrap text-sm">
+                    <thead className="sticky top-0 z-10 bg-surface/90 text-[0.8125rem] uppercase tracking-wider text-muted backdrop-blur-md">
                       <tr>
                         <th className="px-4 py-3.5 text-left font-medium">{t('r.month')}</th>
                         <th className="px-3 py-3.5 text-right font-medium">{t('r.billed')}</th>
@@ -166,13 +166,13 @@ export default function Reports() {
                         className="flex items-center gap-3 px-4 py-3">
                         <div className="flex size-10 shrink-0 flex-col items-center justify-center rounded-xl bg-bad/15 text-bad ring-1 ring-inset ring-bad/25">
                           <span className="text-sm font-bold leading-none">{x.months.length}</span>
-                          <span className="text-[9px] leading-none text-bad">{t('r.months')}</span>
+                          <span className="text-[0.6875rem] leading-none text-bad">{t('r.months')}</span>
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="font-semibold text-fg">{x.number} <span className="text-xs font-normal text-subtle">{wingName(x.wingId)}</span></p>
                           <p className="truncate text-sm text-muted">{x.ownerName || '—'}</p>
                           <p className="mt-1.5 flex flex-wrap gap-1">
-                            {[...x.months].sort().map((m) => <span key={m} className="rounded-md bg-bad/10 px-1.5 py-0.5 text-[11px] text-bad ring-1 ring-inset ring-bad/20">{periodLabel(m, true)}</span>)}
+                            {[...x.months].sort().map((m) => <span key={m} className="rounded-md bg-bad/10 px-1.5 py-0.5 text-[0.8125rem] text-bad ring-1 ring-inset ring-bad/20">{periodLabel(m, true)}</span>)}
                           </p>
                         </div>
                         <p className="font-bold text-bad">{inr(x.amount)}</p>

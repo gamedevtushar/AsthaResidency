@@ -77,8 +77,8 @@ export default function Units() {
           })}
         </div>
 
-        <motion.div variants={reveal} className="mb-3 flex shrink-0 gap-2">
-          <SearchBox value={search} onChange={setSearch} placeholder={t('u.search')} className="min-w-0 flex-1 lg:max-w-xs" />
+        <motion.div variants={reveal} className="mb-3 flex shrink-0 flex-wrap gap-2">
+          <SearchBox value={search} onChange={setSearch} placeholder={t('u.search')} className="min-w-[8rem] flex-1 lg:max-w-xs" />
           <Segmented value={typeTab} onChange={setTypeTab}
             options={[{ value: '', label: t('all') }, { value: 'flat', label: t('flats') }, { value: 'shop', label: t('shops') }]} />
         </motion.div>
@@ -92,7 +92,7 @@ export default function Units() {
                     <h3 className="text-sm font-semibold text-fg">{w.name}</h3>
                     <span className="text-xs text-subtle">{items.length}</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-7">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(5.75rem,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2.5">
                     {items.map((u, i) => {
                       const editable = canEdit(u.wingId)
                       return (
@@ -105,7 +105,7 @@ export default function Units() {
                             <span className="truncate text-sm font-bold text-fg">{u.number}</span>
                             {u.type === 'shop' ? <Store className="size-3.5 shrink-0 text-warn" /> : <Home className="size-3.5 shrink-0 text-subtle" />}
                           </span>
-                          <span className={cx('mt-0.5 w-full truncate text-[11px]', u.ownerName ? 'text-muted' : 'italic text-subtle')}>{u.ownerName || t('noOwner')}</span>
+                          <span className={cx('mt-0.5 w-full truncate text-[0.8125rem]', u.ownerName ? 'text-muted' : 'italic text-subtle')}>{u.ownerName || t('noOwner')}</span>
                           <span className="mt-2 text-xs font-semibold text-accent-ink">{inr(u.maintenance)}</span>
                         </motion.button>
                       )
@@ -113,7 +113,7 @@ export default function Units() {
                     {canEdit(w.id) && !search && !typeTab && (
                       <motion.button type="button" whileTap={{ scale: 0.94 }} onClick={() => forms.open('unit', { wingId: w.id })} aria-label={t('u.addUnit')}
                         className="flex min-h-[84px] flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-fg/20 text-subtle transition hover:border-accent/60 hover:bg-accent/10 hover:text-accent-ink cursor-pointer">
-                        <Plus className="size-5" /><span className="text-[11px] font-medium">{t('u.addUnit')}</span>
+                        <Plus className="size-5" /><span className="text-[0.8125rem] font-medium">{t('u.addUnit')}</span>
                       </motion.button>
                     )}
                   </div>

@@ -34,6 +34,47 @@ const OPTIONS = [
   { value: 'system', icon: Monitor, label: 'Auto' },
 ]
 
+/** Text size preference: 'normal' | 'large' | 'xl'. Applied as data-text on <html>, which scales every rem. */
+const TEXT_KEY = 'textSize'
+const textListeners = new Set()
+
+export const getTextSize = () => {
+  try { return localStorage.getItem(TEXT_KEY) || 'normal' } catch { return 'normal' }
+}
+
+export function setTextSize(size) {
+  try { localStorage.setItem(TEXT_KEY, size) } catch { /* storage unavailable */ }
+  document.documentElement.dataset.text = size
+  textListeners.forEach((l) => l())
+}
+
+const useTextSize = () => useSyncExternalStore((cb) => { textListeners.add(cb); return () => textListeners.delete(cb) }, getTextSize)
+
+const SIZES = [
+  { value: 'normal', label: 'Normal', className: 'text-xs' },
+  { value: 'large', label: 'Large', className: 'text-sm' },
+  { value: 'xl', label: 'Extra large', className: 'text-lg' },
+]
+
+/** Compact A / A / A switch for the text size */
+export function TextSizeSwitch({ className = '' }) {
+  const size = useTextSize()
+  return (
+    <div role="radiogroup" aria-label="Text size" className={`inline-flex rounded-xl border border-fg/10 bg-fg/[0.04] p-0.5 ${className}`}>
+      {SIZES.map(({ value, label, className: textClass }) => {
+        const active = size === value
+        return (
+          <button key={value} type="button" role="radio" aria-checked={active} aria-label={label} onClick={() => setTextSize(value)}
+            className={`relative flex size-8 items-center justify-center rounded-lg font-bold transition-colors cursor-pointer ${textClass} ${active ? 'text-fg' : 'text-subtle hover:text-fg'}`}>
+            {active && <motion.span layoutId="text-pill" className="absolute inset-0 rounded-lg bg-surface shadow-sm ring-1 ring-fg/10" />}
+            <span className="relative leading-none">A</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 /** Compact Light / Dark / Auto switch */
 export function ThemeSwitch({ className = '' }) {
   const pref = useThemePref()

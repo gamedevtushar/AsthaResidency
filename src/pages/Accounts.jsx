@@ -63,21 +63,24 @@ export default function Accounts() {
           </>}
         </>} />
 
-      <Card className="mb-3 grid shrink-0 grid-cols-3 gap-2 p-4 lg:mb-4">
-        {[[t('a.otherIncome'), income, 'text-ok'], [t('expenses'), expense, 'text-bad'], [t('a.net'), income - expense, income - expense >= 0 ? 'text-fg' : 'text-warn']].map(([label, v, color]) => (
-          <div key={label} className="min-w-0">
-            <p className="truncate text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</p>
-            <p className={cx('truncate text-lg font-bold sm:text-xl', color)}>{inr(v)}</p>
-          </div>
-        ))}
+      {/* Three columns when there is room, otherwise one row per figure */}
+      <Card className="@container mb-3 shrink-0 p-4 lg:mb-4">
+        <div className="grid gap-2 @min-[18rem]:grid-cols-3">
+          {[[t('a.otherIncome'), income, 'text-ok'], [t('expenses'), expense, 'text-bad'], [t('a.net'), income - expense, income - expense >= 0 ? 'text-fg' : 'text-warn']].map(([label, v, color]) => (
+            <div key={label} className="flex min-w-0 items-center justify-between gap-3 @min-[18rem]:block">
+              <p className="truncate text-[0.8125rem] font-semibold uppercase tracking-wider text-muted">{label}</p>
+              <p className={cx('truncate text-lg font-bold sm:text-xl', color)}>{inr(v)}</p>
+            </div>
+          ))}
+        </div>
       </Card>
 
       <motion.div variants={reveal} className="mb-3 flex shrink-0 flex-col gap-2 xl:flex-row xl:items-center">
         <WingChips includeCommon value={wing} onChange={setWing} className="xl:flex-1" />
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Segmented value={type} onChange={setType}
             options={[{ value: '', label: t('all') }, { value: 'expense', label: t('expenses') }, { value: 'income', label: t('income') }]} />
-          <SearchBox value={search} onChange={setSearch} placeholder={t('a.search')} className="min-w-0 flex-1 xl:w-60 xl:flex-none" />
+          <SearchBox value={search} onChange={setSearch} placeholder={t('a.search')} className="min-w-[8rem] flex-1 xl:w-60 xl:flex-none" />
         </div>
       </motion.div>
 
@@ -100,11 +103,11 @@ export default function Accounts() {
                   className={cx('flex items-center gap-3 px-4 py-3 transition-colors', editable && 'cursor-pointer hover:bg-fg/[0.06]')}>
                   <IconTile icon={categoryIcon(x.category)} tone={isIn ? 'green' : 'red'} />
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2 font-semibold text-fg">
-                      <span className="truncate">{tv(x.category)}</span>
+                    <p className="truncate font-semibold text-fg">{tv(x.category)}</p>
+                    <p className="mt-0.5 flex min-w-0 items-center gap-2 text-sm text-muted">
                       <Badge color={x.wingId ? 'blue' : 'gray'}>{wingName(x.wingId)}</Badge>
+                      <span className="truncate">{tv(x.mode)}{x.description && ` · ${x.description}`}</span>
                     </p>
-                    <p className="truncate text-sm text-muted">{tv(x.mode)}{x.description && ` · ${x.description}`}</p>
                   </div>
                   <p className={cx('shrink-0 text-sm font-bold', isIn ? 'text-ok' : 'text-fg')}>{isIn ? '+' : '−'}{inr(x.amount)}</p>
                 </motion.div>

@@ -46,7 +46,7 @@ export function Button({ variant = 'primary', size = 'md', icon: Icon, loading, 
   const sizes = {
     sm: 'h-9 px-3 text-xs gap-1.5 rounded-lg',
     md: 'h-11 px-4 text-sm gap-2 rounded-xl',
-    lg: 'h-12 px-5 text-[15px] gap-2 rounded-xl',
+    lg: 'h-12 px-5 text-base gap-2 rounded-xl',
     icon: 'size-11 rounded-xl',
     iconLg: 'size-12 rounded-xl',
   }
@@ -101,7 +101,7 @@ export function Tooltip({ label, children, side = 'top' }) {
 export function IconButton({ icon: Icon, label, variant = 'ghost', size = 'icon', className, ...props }) {
   return (
     <Tooltip label={label}>
-      <Button variant={variant} size={size} aria-label={label} className={className} {...props}><Icon className="size-[18px]" /></Button>
+      <Button variant={variant} size={size} aria-label={label} className={className} {...props}><Icon className="size-[1.125rem]" /></Button>
     </Tooltip>
   )
 }
@@ -134,7 +134,7 @@ export function IconTile({ icon: Icon, tone = 'indigo', className = 'size-10', i
 
 /* ============ Form fields ============ */
 // 16px text on phones stops iOS from zooming into the field
-const fieldBase = 'w-full h-12 rounded-xl border bg-fg/[0.03] px-3.5 text-base text-fg placeholder:text-subtle outline-none transition duration-150 hover:border-fg/25 focus:bg-surface focus:ring-4 disabled:opacity-50 sm:text-[15px]'
+const fieldBase = 'w-full h-12 rounded-xl border bg-fg/[0.03] px-3.5 text-base text-fg placeholder:text-subtle outline-none transition duration-150 hover:border-fg/25 focus:bg-surface focus:ring-4 disabled:opacity-50 sm:text-base'
 const fieldCls = (invalid) => cx(fieldBase, invalid
   ? 'border-bad/60 focus:border-bad focus:ring-bad/15'
   : 'border-fg/12 focus:border-accent focus:ring-accent/15')
@@ -144,7 +144,7 @@ export function Field({ label, hint, error, optional, children, className }) {
   return (
     <div className={cx('block', className)}>
       {label && (
-        <p className="mb-2 flex items-center gap-1.5 text-[13px] font-semibold text-muted">
+        <p className="mb-2 flex items-center gap-1.5 text-[0.875rem] font-semibold text-muted">
           {label}{optional && <span className="font-normal text-subtle">· {t('optional')}</span>}
         </p>
       )}
@@ -214,7 +214,7 @@ export function Chips({ value, onChange, options, className, variant = 'pill', s
             )}>
             {o.icon && <o.icon className={tile ? 'size-5' : 'size-4'} />}
             <span className={tile ? 'leading-tight' : ''}>{o.label}</span>
-            {o.count !== undefined && <span className={cx('rounded-md px-1.5 text-[11px] font-semibold', active ? 'bg-accent/15' : 'bg-fg/[0.07]')}>{o.count}</span>}
+            {o.count !== undefined && <span className={cx('rounded-md px-1.5 text-[0.8125rem] font-semibold', active ? 'bg-accent/15' : 'bg-fg/[0.07]')}>{o.count}</span>}
           </motion.button>
         )
       })}
@@ -378,7 +378,7 @@ export function Segmented({ value, onChange, options, className }) {
         const active = value === o.value
         return (
           <button key={o.value} type="button" onClick={() => onChange(o.value)} aria-pressed={active}
-            className={cx('relative flex flex-1 items-center justify-center rounded-lg px-3.5 text-[13px] font-semibold whitespace-nowrap cursor-pointer transition-colors', active ? 'text-fg' : 'text-muted hover:text-fg')}>
+            className={cx('relative flex flex-1 items-center justify-center rounded-lg px-3.5 text-[0.875rem] font-semibold whitespace-nowrap cursor-pointer transition-colors', active ? 'text-fg' : 'text-muted hover:text-fg')}>
             {active && <motion.span layoutId={`seg-${id}`} transition={spring} className="absolute inset-0 rounded-lg bg-surface shadow-sm ring-1 ring-fg/10" />}
             <span className="relative">{o.label}</span>
           </button>
@@ -397,7 +397,7 @@ const BADGE = {
   gray: 'bg-fg/[0.07] text-muted',
 }
 export const Badge = ({ color = 'gray', children, className, dot }) => (
-  <span className={cx('inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap', BADGE[color], className)}>
+  <span className={cx('inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[0.8125rem] font-semibold whitespace-nowrap', BADGE[color], className)}>
     {dot && <span className="size-1.5 rounded-full bg-current" />}{children}
   </span>
 )
@@ -407,7 +407,7 @@ export function PageHeader({ title, subtitle, actions }) {
   return (
     <motion.div variants={itemVariants} className="mb-4 flex shrink-0 flex-col gap-3 md:flex-row md:items-center md:justify-between lg:mb-5">
       <div className="min-w-0">
-        <h1 className="truncate text-2xl font-bold tracking-tight text-fg lg:text-[28px]">{title}</h1>
+        <h1 className="truncate text-2xl font-bold tracking-tight text-fg lg:text-[1.75rem]">{title}</h1>
         {subtitle && <p className="mt-0.5 truncate text-sm text-muted">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2 max-md:[&>*:first-child]:flex-1">{actions}</div>}
@@ -437,7 +437,7 @@ export function StatCard({ label, amount, value, sub, icon, tone = 'indigo', cla
           </p>
           {sub && <p className="mt-0.5 truncate text-xs text-subtle">{sub}</p>}
         </div>
-        {icon && <IconTile icon={icon} tone={tone} className="hidden size-9 sm:flex lg:hidden xl:flex" iconClass="size-[18px]" />}
+        {icon && <IconTile icon={icon} tone={tone} className="hidden size-9 sm:flex lg:hidden xl:flex" iconClass="size-[1.125rem]" />}
       </div>
     </Card>
   )
@@ -460,8 +460,8 @@ export function Ring({ value, size = 120, stroke = 12, tone = 'text-ok', childre
   const c = 2 * Math.PI * r
   const pct = Math.max(0, Math.min(100, value || 0))
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
+    <div className="relative shrink-0" style={{ width: `${size / 16}rem`, height: `${size / 16}rem` }}>
+      <svg viewBox={`0 0 ${size} ${size}`} className="size-full -rotate-90">
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth={stroke} className="text-fg/[0.08]" />
         <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" className={tone}
           strokeDasharray={c} initial={{ strokeDashoffset: c }} animate={{ strokeDashoffset: c - (pct / 100) * c }}

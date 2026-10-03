@@ -5,7 +5,7 @@ import { useAuth, roleLabel } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { APP_NAME } from '../firebase'
 import { t, LangSwitch } from '../i18n'
-import { ThemeSwitch } from '../theme'
+import { ThemeSwitch, TextSizeSwitch } from '../theme'
 import { pageVariants, confirmDialog, cx, Button } from './ui'
 import { forms, startInstall } from './forms'
 import { useInstall } from '../pwa'
@@ -34,7 +34,7 @@ function Logo() {
     <Link to="/" className="flex min-w-0 items-center gap-3">
       <LogoMark className="size-10 shrink-0" />
       <div className="min-w-0 leading-tight">
-        <p className="truncate text-[15px] font-bold text-fg">{APP_NAME}</p>
+        <p className="truncate text-base font-bold text-fg">{APP_NAME}</p>
         <p className="truncate text-xs text-muted">{t('appSub')}</p>
       </div>
     </Link>
@@ -72,24 +72,25 @@ export default function Layout() {
         <nav className="no-scrollbar min-h-0 flex-1 space-y-1 overflow-y-auto px-3">
           {nav.map(({ to, key, icon: Icon, end }) => (
             <NavLink key={to} to={to} end={end}
-              className={({ isActive }) => cx('relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[15px] font-medium transition-colors', isActive ? 'text-accent-ink' : 'text-muted hover:bg-fg/[0.05] hover:text-fg')}>
+              className={({ isActive }) => cx('relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-base font-medium transition-colors', isActive ? 'text-accent-ink' : 'text-muted hover:bg-fg/[0.05] hover:text-fg')}>
               {({ isActive }) => <>
                 {isActive && <motion.span layoutId="side-active" transition={spring} className="absolute inset-0 rounded-xl bg-accent/10" />}
-                <Icon className="relative size-[18px]" /><span className="relative">{t(`nav.${key}`)}</span>
+                <Icon className="relative size-[1.125rem]" /><span className="relative">{t(`nav.${key}`)}</span>
               </>}
             </NavLink>
           ))}
           {!installed && (
             <button type="button" onClick={() => startInstall(canPrompt)}
-              className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-[15px] font-medium text-muted transition-colors hover:bg-fg/[0.05] hover:text-fg cursor-pointer">
-              <Download className="size-[18px]" />{t('pwa.install')}
+              className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-base font-medium text-muted transition-colors hover:bg-fg/[0.05] hover:text-fg cursor-pointer">
+              <Download className="size-[1.125rem]" />{t('pwa.install')}
             </button>
           )}
         </nav>
         <div className="m-3 space-y-3 rounded-xl border border-fg/10 bg-fg/[0.03] p-3">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <LangSwitch />
             <ThemeSwitch />
+            <TextSizeSwitch />
           </div>
           {isLoggedIn ? (
             <>
@@ -150,16 +151,16 @@ export default function Layout() {
                 </div>
               )
               if (item.more) return (
-                <button key="more" type="button" onClick={() => forms.open('more')} className="flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-medium text-muted cursor-pointer">
-                  <MenuIcon className="size-[22px]" /><span>{t('more')}</span>
+                <button key="more" type="button" onClick={() => forms.open('more')} className="flex flex-col items-center gap-1 rounded-xl py-2 text-[0.8125rem] font-medium text-muted cursor-pointer">
+                  <MenuIcon className="size-[1.375rem]" /><span>{t('more')}</span>
                 </button>
               )
               const { to, key, icon: Icon, end } = item
               return (
-                <NavLink key={to} to={to} end={end} className="relative flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-medium">
+                <NavLink key={to} to={to} end={end} className="relative flex flex-col items-center gap-1 rounded-xl py-2 text-[0.8125rem] font-medium">
                   {({ isActive }) => <>
                     {isActive && <motion.span layoutId="bottom-active" transition={spring} className="absolute inset-0 rounded-xl bg-bar-pill" />}
-                    <Icon className={cx('relative size-[22px]', isActive ? 'text-accent-ink' : 'text-muted')} />
+                    <Icon className={cx('relative size-[1.375rem]', isActive ? 'text-accent-ink' : 'text-muted')} />
                     <span className={cx('relative max-w-full truncate px-0.5', isActive ? 'font-semibold text-accent-ink' : 'text-muted')}>{t(`nav.${key}Short`)}</span>
                   </>}
                 </NavLink>

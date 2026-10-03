@@ -29,7 +29,7 @@ export function MonthPicker({ value, onChange, className }) {
   const isCurrent = value === currentPeriod()
   const btn = 'flex size-11 items-center justify-center text-muted transition hover:bg-fg/10 hover:text-fg cursor-pointer disabled:opacity-25 disabled:pointer-events-none'
   return (
-    <div className={cx('inline-flex h-11 items-center overflow-hidden rounded-xl border border-fg/12 bg-surface', className)}>
+    <div className={cx('inline-flex h-11 min-w-fit items-center overflow-hidden rounded-xl border border-fg/12 bg-surface', className)}>
       <motion.button type="button" aria-label="previous month" whileTap={{ scale: 0.85 }} className={btn} onClick={() => onChange(shiftPeriod(value, -1))}><ChevronLeft className="size-4" /></motion.button>
       <label className="relative flex min-w-36 flex-1 cursor-pointer items-center justify-center gap-2 px-1 text-sm font-semibold text-fg">
         <CalendarDays className="size-4 text-accent-ink" />

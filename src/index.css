@@ -5,7 +5,17 @@
    accent for the brand colour and ok / bad / warn / info for status.
    bar / bar-line / bar-pill colour the phone top and bottom bars so they stand apart from the page. */
 @theme {
-  --font-sans: "Inter", "Noto Sans Gujarati", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", "Hind Vadodara", ui-sans-serif, system-ui, sans-serif;
+
+  /* Slightly larger than Tailwind's defaults so everyone can read comfortably */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.25rem;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.375rem;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.625rem;
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.75rem;
 
   --color-bg: var(--c-bg);
   --color-fg: var(--c-fg);
@@ -74,6 +84,13 @@
   --glass-border: rgb(148 163 184 / 0.13);
   --glass-shadow: 0 10px 30px -14px rgb(0 0 0 / 0.6);
 }
+
+/* Text size option in the menu: everything is sized in rem, so this scales the whole app */
+html[data-text="large"] { font-size: 112.5%; }
+html[data-text="xl"] { font-size: 125%; }
+
+/* Gujarati letters join together, so extra letter spacing pulls words apart */
+html:lang(gu) [class*="tracking-"] { letter-spacing: normal; }
 
 /* App-like: the page itself never scrolls; screens manage their own scroll areas */
 html, body, #root { height: 100%; overflow: hidden; }

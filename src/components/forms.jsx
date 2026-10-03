@@ -5,7 +5,7 @@ import { addDoc, collection, deleteDoc, doc, query, serverTimestamp, setDoc, upd
 import { sendPasswordResetEmail } from 'firebase/auth'
 import {
   ReceiptIndianRupee, ArrowUpCircle, ArrowDownCircle, Home, Store, Building2, UserPlus, Users, BarChart3, KeyRound, LogOut,
-  Languages, CheckCircle2, RotateCcw, Trash2, Check, Eye, EyeOff, Wand2, Copy, Share2, Crown, UserCog, Shield, Ban, Pencil, Layers, ChevronRight, X, Plus, SunMoon, LogIn, CalendarCog,
+  Languages, CheckCircle2, RotateCcw, Trash2, Check, Eye, EyeOff, Wand2, Copy, Share2, Crown, UserCog, Shield, Ban, Pencil, Layers, ChevronRight, X, Plus, SunMoon, ALargeSmall, LogIn, CalendarCog,
   Download, Share, SquarePlus, Compass, EllipsisVertical, Smartphone,
 } from 'lucide-react'
 import { auth, db, createLogin, toLoginEmail, toLoginId, isRealEmail, APP_NAME } from '../firebase'
@@ -16,7 +16,7 @@ import { inr, today, dateLabel, currentPeriod, shiftPeriod, periodLabel, PAYMENT
 import { recordPayment, markUnpaid, dueId, planUnits, createUnits, createWingWithUnits, updateWingMaintenance, saveMonthBills } from '../lib/actions'
 import { MODE_ICONS, categoryIcon } from '../lib/icons'
 import { t, tv, LangSwitch } from '../i18n'
-import { ThemeSwitch } from '../theme'
+import { ThemeSwitch, TextSizeSwitch } from '../theme'
 import { useInstall, promptInstall, isIOS } from '../pwa'
 import LogoMark from './Logo'
 import { AmountInput, Button, Chips, DateField, Field, IconTile, Input, Modal, Segmented, Select, SkeletonTiles, Stepper, confirmDialog, cx, toast } from './ui'
@@ -95,8 +95,8 @@ function MoreSheet({ onClose }) {
   }
   const Row = ({ icon: Icon, label, onClick, danger, right }) => (
     <button type="button" onClick={onClick}
-      className={cx('flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-[15px] transition-colors cursor-pointer', danger ? 'text-bad hover:bg-bad/10' : 'text-fg hover:bg-fg/[0.07]')}>
-      <IconTile icon={Icon} tone={danger ? 'red' : 'gray'} className="size-9" iconClass="size-[18px]" />
+      className={cx('flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-base transition-colors cursor-pointer', danger ? 'text-bad hover:bg-bad/10' : 'text-fg hover:bg-fg/[0.07]')}>
+      <IconTile icon={Icon} tone={danger ? 'red' : 'gray'} className="size-9" iconClass="size-[1.125rem]" />
       <span className="flex-1">{label}</span>
       {right ?? <ChevronRight className="size-4 text-subtle" />}
     </button>
@@ -109,7 +109,7 @@ function MoreSheet({ onClose }) {
             className="mb-2 flex w-full items-center gap-3 rounded-2xl border border-accent/25 bg-accent/[0.07] px-3 py-3 text-left transition-colors hover:bg-accent/[0.12] cursor-pointer">
             <LogoMark className="size-10 shrink-0" />
             <span className="min-w-0 flex-1">
-              <span className="block text-[15px] font-semibold text-fg">{t('pwa.install')}</span>
+              <span className="block text-base font-semibold text-fg">{t('pwa.install')}</span>
               <span className="block truncate text-xs text-muted">{t('pwa.installHint')}</span>
             </span>
             <Download className="size-5 shrink-0 text-accent-ink" />
@@ -119,15 +119,20 @@ function MoreSheet({ onClose }) {
         <Row icon={BarChart3} label={t('nav.reports')} onClick={() => go('/reports')} />
         {isSuper && <Row icon={Users} label={t('nav.users')} onClick={() => go('/users')} />}
         <div className="my-2 h-px bg-fg/10" />
-        <div className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] text-fg">
-          <IconTile icon={Languages} tone="gray" className="size-9" iconClass="size-[18px]" />
+        <div className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-base text-fg">
+          <IconTile icon={Languages} tone="gray" className="size-9" iconClass="size-[1.125rem]" />
           <span className="flex-1">{t('language')}</span>
           <LangSwitch />
         </div>
-        <div className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] text-fg">
-          <IconTile icon={SunMoon} tone="gray" className="size-9" iconClass="size-[18px]" />
+        <div className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-base text-fg">
+          <IconTile icon={SunMoon} tone="gray" className="size-9" iconClass="size-[1.125rem]" />
           <span className="flex-1">{t('theme')}</span>
           <ThemeSwitch />
+        </div>
+        <div className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-base text-fg">
+          <IconTile icon={ALargeSmall} tone="gray" className="size-9" iconClass="size-[1.125rem]" />
+          <span className="flex-1">{t('textSize')}</span>
+          <TextSizeSwitch />
         </div>
         <div className="my-2 h-px bg-fg/10" />
         {isLoggedIn ? <>
@@ -189,7 +194,7 @@ function CollectSheet({ onClose, period = currentPeriod() }) {
               </span>
               <span className="mt-0.5 w-full truncate text-xs text-muted">{unit.ownerName || '—'}</span>
               <span className="mt-2.5 text-sm font-semibold text-ok">{inr(due?.amount ?? unit.maintenance)}</span>
-              {!due && <span className="mt-1 text-[10px] text-subtle">{t('collect.notBilled')}</span>}
+              {!due && <span className="mt-1 text-[0.75rem] text-subtle">{t('collect.notBilled')}</span>}
             </motion.button>
           ))}
         </div>
@@ -694,7 +699,7 @@ function UserForm({ user, onClose }) {
                   <motion.button key={r.value} type="button" whileTap={{ scale: 0.97 }} onClick={() => set('role')(r.value)} aria-pressed={active}
                     className={cx('flex items-center gap-3 rounded-2xl border p-3 text-left transition cursor-pointer',
                       active ? 'border-accent/60 bg-accent/10 shadow-lg' : 'border-fg/10 bg-fg/[0.04] hover:bg-fg/[0.08]')}>
-                    <IconTile icon={r.icon} tone={r.tone} className="size-9" iconClass="size-[18px]" />
+                    <IconTile icon={r.icon} tone={r.tone} className="size-9" iconClass="size-[1.125rem]" />
                     <span className="min-w-0">
                       <span className="block text-sm font-semibold text-fg">{roleLabel(r.value)}</span>
                       <span className="block truncate text-xs text-muted">{t(r.hint)}</span>
@@ -920,8 +925,8 @@ function InstallSheet({ onClose }) {
           <motion.li key={text} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}
             className="flex items-center gap-3 rounded-xl border border-fg/10 p-3">
             <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">{i + 1}</span>
-            <IconTile icon={Icon} tone="gray" className="size-9" iconClass="size-[18px]" />
-            <span className="text-[15px] text-fg">{text}</span>
+            <IconTile icon={Icon} tone="gray" className="size-9" iconClass="size-[1.125rem]" />
+            <span className="text-base text-fg">{text}</span>
           </motion.li>
         ))}
       </ol>

@@ -11,14 +11,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Gujarati:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Vadodara:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <title>Astha Residency – Maintenance</title>
     <script>
-      // Apply the saved theme before the first paint (avoids a light/dark flash)
+      // Apply the saved theme and text size before the first paint (avoids a light/dark flash)
       try {
         var p = localStorage.getItem('theme') || 'system'
         var dark = p === 'dark' || (p === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+        document.documentElement.dataset.text = localStorage.getItem('textSize') || 'normal'
       } catch (e) {}
     </script>
   </head>

@@ -96,7 +96,7 @@ export default function Login() {
     }
   }
 
-  const inputCls = 'h-12 w-full rounded-xl border border-fg/12 bg-fg/[0.03] pl-11 pr-3 text-base sm:text-[15px] text-fg placeholder:text-subtle outline-none transition focus:border-accent focus:bg-surface focus:ring-4 focus:ring-accent/15'
+  const inputCls = 'h-12 w-full rounded-xl border border-fg/12 bg-fg/[0.03] pl-11 pr-3 text-base sm:text-base text-fg placeholder:text-subtle outline-none transition focus:border-accent focus:bg-surface focus:ring-4 focus:ring-accent/15'
 
   return (
     <div className="relative flex h-full">

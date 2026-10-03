@@ -73,32 +73,32 @@ export default function Dashboard() {
 
       <div className="grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-12 lg:grid-rows-[auto_minmax(0,1fr)] lg:gap-4">
         {/* Hero: this month's collection */}
-        <Card className="relative overflow-hidden p-5 lg:col-span-6 xl:col-span-7">
-          <div className="relative flex items-center gap-5">
+        <Card className="@container relative overflow-hidden p-5 lg:col-span-6 xl:col-span-7">
+          <div className="relative flex flex-col items-center gap-4 text-center @min-[18rem]:flex-row @min-[18rem]:gap-5 @min-[18rem]:text-left">
             <Ring value={loading ? 0 : d.rate} size={124} stroke={12}>
               <span className="text-2xl font-bold text-fg">{loading ? '—' : `${d.rate}%`}</span>
-              <span className="text-[10px] uppercase tracking-wider text-muted">{t('dash.rate')}</span>
+              <span className="text-[0.75rem] uppercase tracking-wider text-muted">{t('dash.rate')}</span>
             </Ring>
-            <div className="min-w-0 flex-1">
+            <div className="w-full min-w-0 @min-[18rem]:flex-1">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-ink">{t('dash.collected')}</p>
               <p className="mt-1 truncate text-3xl font-bold tracking-tight text-fg sm:text-4xl">
                 {loading ? <span className="shimmer inline-block h-9 w-40 rounded-lg" /> : inr(d.collected)}
               </p>
               <p className="mt-1 truncate text-sm text-muted">{t('dash.collectedOf', { a: t('dash.unitsPaid', { a: d.paidCount, b: d.unitCount }), b: inr(d.billed) })}</p>
-              {isAdmin && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <motion.button type="button" whileTap={{ scale: 0.96 }} onClick={() => forms.open('collect')}
-                    className="inline-flex h-10 items-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700 cursor-pointer">
-                    <ReceiptIndianRupee className="size-4" />{t('dash.quickBills')}
-                  </motion.button>
-                  <motion.button type="button" whileTap={{ scale: 0.96 }} onClick={() => forms.open('entry', { type: 'expense' })}
-                    className="inline-flex h-10 items-center gap-2 rounded-xl border border-fg/15 bg-fg/10 px-4 text-sm font-semibold text-fg backdrop-blur-md transition hover:bg-fg/15 cursor-pointer">
-                    <Plus className="size-4" />{t('a.addExpense')}
-                  </motion.button>
-                </div>
-              )}
             </div>
           </div>
+          {isAdmin && (
+            <div className="relative mt-4 flex flex-wrap gap-2">
+              <motion.button type="button" whileTap={{ scale: 0.96 }} onClick={() => forms.open('collect')}
+                className="inline-flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700 cursor-pointer">
+                <ReceiptIndianRupee className="size-4" />{t('dash.quickBills')}
+              </motion.button>
+              <motion.button type="button" whileTap={{ scale: 0.96 }} onClick={() => forms.open('entry', { type: 'expense' })}
+                className="inline-flex h-11 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-fg/15 bg-fg/10 px-4 text-sm font-semibold text-fg backdrop-blur-md transition hover:bg-fg/15 cursor-pointer">
+                <Plus className="size-4" />{t('a.addExpense')}
+              </motion.button>
+            </div>
+          )}
         </Card>
 
         {/* 2 × 2 stats */}
@@ -127,12 +127,12 @@ export default function Dashboard() {
                       <motion.div className={cx('w-full rounded-t-md', color)}
                         initial={{ height: 0 }} animate={{ height: loading ? 0 : `${Math.max((c[k] / max) * 100, c[k] ? 2 : 0)}%` }}
                         transition={{ type: 'spring', stiffness: 120, damping: 18, delay: 0.25 + i * 0.06 + j * 0.03 }} />
-                      <span className="glass-strong pointer-events-none absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-lg px-2 py-1 text-[10px] text-fg group-hover:block">{inr(c[k])}</span>
+                      <span className="glass-strong pointer-events-none absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-lg px-2 py-1 text-[0.75rem] text-fg group-hover:block">{inr(c[k])}</span>
                     </div>
                   ))}
                 </div>
-                <p className={cx('mt-2 text-[11px]', c.p === now ? 'font-semibold text-fg' : 'text-muted')}>{periodLabel(c.p, true)}</p>
-                <p className="hidden text-[10px] text-subtle sm:block">{fmtShort(c.income)}/{fmtShort(c.expense)}</p>
+                <p className={cx('mt-2 text-[0.8125rem]', c.p === now ? 'font-semibold text-fg' : 'text-muted')}>{periodLabel(c.p, true)}</p>
+                <p className="hidden text-[0.75rem] text-subtle sm:block">{fmtShort(c.income)}/{fmtShort(c.expense)}</p>
               </div>
             ))}
           </div>

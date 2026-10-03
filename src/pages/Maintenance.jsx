@@ -65,16 +65,18 @@ export default function Maintenance() {
       {/* Summary */}
       <Card className="mb-3 flex shrink-0 items-center gap-4 p-4 lg:mb-4">
         <Ring value={pct} size={60} stroke={7}><span className="text-sm font-bold text-fg">{pct}%</span></Ring>
-        <div className="grid min-w-0 flex-1 grid-cols-3 gap-2">
-          {[[t('m.collected'), totals.collected, 'text-ok', t('m.paidN', { n: paid.length })],
-            [t('m.pending'), totals.pending, 'text-bad', t('m.unpaidN', { n: inWing.length - paid.length })],
-            [t('m.totalBilled'), totals.billed, 'text-fg', t('m.units', { n: inWing.length })]].map(([label, v, color, sub]) => (
-            <div key={label} className="min-w-0">
-              <p className="truncate text-xs font-semibold text-muted">{label}</p>
-              <p className={cx('truncate text-base font-bold sm:text-xl', color)}>{inr(v)}</p>
-              <p className="truncate text-xs text-subtle">{sub}</p>
-            </div>
-          ))}
+        <div className="@container min-w-0 flex-1">
+          <div className="grid gap-2 @min-[14rem]:grid-cols-3">
+            {[[t('m.collected'), totals.collected, 'text-ok', t('m.paidN', { n: paid.length })],
+              [t('m.pending'), totals.pending, 'text-bad', t('m.unpaidN', { n: inWing.length - paid.length })],
+              [t('m.totalBilled'), totals.billed, 'text-fg', t('m.units', { n: inWing.length })]].map(([label, v, color, sub]) => (
+              <div key={label} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 @min-[14rem]:block">
+                <p className="truncate text-xs font-semibold text-muted">{label}</p>
+                <p className={cx('col-start-2 row-span-2 row-start-1 truncate text-base font-bold sm:text-xl', color)}>{inr(v)}</p>
+                <p className="truncate text-xs text-subtle">{sub}</p>
+              </div>
+            ))}
+          </div>
         </div>
         <div className="hidden w-40 xl:block"><Progress value={pct} /></div>
       </Card>
@@ -118,7 +120,7 @@ export default function Maintenance() {
                     <span className="text-xs text-muted">{t('m.paidOf', { a: items.filter((d) => d.status === 'paid').length, b: items.length })}</span>
                   </div>
                 )}
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 xl:grid-cols-7">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(5.75rem,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2 sm:gap-2.5">
                   {items.map((d, i) => <DueTile key={d.id} due={d} index={i} editable={canEdit(d.wingId)} />)}
                 </div>
               </section>
@@ -146,7 +148,7 @@ function DueTile({ due: d, index, editable }) {
       </span>
       <span className="mt-0.5 w-full truncate text-xs text-muted">{d.ownerName?.split(' ')[0] || '—'}</span>
       <span className="mt-auto flex w-full items-center justify-between pt-1.5">
-        <span className={cx('text-[13px] font-semibold', isPaid ? 'text-ok' : 'text-fg')}>{inr(d.amount)}</span>
+        <span className={cx('text-[0.875rem] font-semibold', isPaid ? 'text-ok' : 'text-fg')}>{inr(d.amount)}</span>
         {d.type === 'shop' && <Store className="size-3.5 text-warn" />}
       </span>
     </motion.button>
