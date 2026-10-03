@@ -427,16 +427,6 @@ export function AnimatedNumber({ value, format = inr }) {
 }
 
 const BAR = { green: 'bg-ok', indigo: 'bg-accent', red: 'bg-bad', amber: 'bg-warn' }
-export function Progress({ value, tone = 'green', className = 'h-2' }) {
-  return (
-    <div className={cx('overflow-hidden rounded-full bg-fg/[0.08]', className)}>
-      <motion.div className={cx('h-full rounded-full', BAR[tone])}
-        initial={{ width: 0 }} animate={{ width: `${Math.max(0, Math.min(100, value))}%` }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }} />
-    </div>
-  )
-}
-
 /** Animated donut ring (colour via tone class) */
 export function Ring({ value, size = 120, stroke = 12, tone = 'text-ok', children }) {
   const r = (size - stroke) / 2

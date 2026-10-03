@@ -8,6 +8,7 @@ const listeners = new Set()
 const matches = (row, { field, op, value }) =>
   op === '==' ? row[field] === value
     : op === 'in' ? value.includes(row[field])
+      : op === '<' ? row[field] < value
       : op === '>=' ? row[field] >= value
         : op === '<=' ? row[field] <= value : true
 

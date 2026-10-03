@@ -9,6 +9,7 @@
     <link rel="manifest" href="/manifest.webmanifest?v=2" />
     <meta name="apple-mobile-web-app-title" content="Astha" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="mobile-web-app-capable" content="yes" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Vadodara:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -19,6 +20,7 @@
         var p = localStorage.getItem('theme') || 'system'
         var dark = p === 'dark' || (p === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+        document.querySelector('meta[name=theme-color]').setAttribute('content', dark ? '#1b2046' : '#e3e7fd')
         document.documentElement.dataset.text = localStorage.getItem('textSize') || 'normal'
       } catch (e) {}
     </script>

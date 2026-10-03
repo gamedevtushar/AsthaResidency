@@ -4,6 +4,15 @@ const inrFormatter = new Intl.NumberFormat('en-IN', { style: 'currency', currenc
 
 export const inr = (n) => inrFormatter.format(Number(n) || 0)
 
+/** Compact rupees for tight spaces: ₹45,000 · ₹1.25L · ₹2.1Cr (never cut off with "…") */
+export const inrShort = (n) => {
+  const v = Number(n) || 0
+  const a = Math.abs(v)
+  if (a < 100000) return inr(v)
+  const [d, u] = a >= 1e7 ? [1e7, 'Cr'] : [1e5, 'L']
+  return `${v < 0 ? '−' : ''}₹${+(a / d).toFixed(2)}${u}`
+}
+
 const pad = (n) => String(n).padStart(2, '0')
 
 /** "2026-10" for the current month */

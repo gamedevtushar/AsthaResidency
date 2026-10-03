@@ -1,23 +1,8 @@
 import { motion, AnimatePresence } from 'motion/react'
 import { ChevronLeft, ChevronRight, Search, X, CalendarDays } from 'lucide-react'
-import { useData } from '../context/DataContext'
 import { periodLabel, shiftPeriod, currentPeriod } from '../lib/format'
-import { Chips, cx } from './ui'
+import { cx } from './ui'
 import { t } from '../i18n'
-
-const wingOptions = (wings, includeCommon, allLabel) => [
-  { value: '', label: allLabel || t('allWings') },
-  ...(includeCommon ? [{ value: 'common', label: t('common') }] : []),
-  ...wings.map((w) => ({ value: w.id, label: w.name })),
-]
-
-/** Horizontal wing chips (scrolls sideways on small screens) */
-export function WingChips({ value, onChange, includeCommon = false, counts, className }) {
-  const { wings } = useData()
-  const opts = wingOptions(wings, includeCommon).map((o) => (counts ? { ...o, count: counts[o.value] } : o))
-  if (wings.length < 2 && !includeCommon) return null
-  return <Chips scroll value={value} onChange={onChange} options={opts} className={className} />
-}
 
 export function MonthPicker({ value, onChange, className }) {
   const isCurrent = value === currentPeriod()

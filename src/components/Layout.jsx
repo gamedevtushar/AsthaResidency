@@ -117,7 +117,7 @@ export default function Layout() {
         {/* Phone top bar */}
         {/* Slim phone top bar: logo and name (plus the wing when there is only one). Menu lives in the bottom bar. */}
         <header className="z-30 flex shrink-0 items-center gap-2 border-b border-bar-line bg-bar px-4 pb-1.5 pt-[calc(0.375rem+env(safe-area-inset-top))] lg:hidden">
-          <LogoMark className="size-7 shrink-0" />
+          <LogoMark className="size-6 shrink-0" />
           <p className="min-w-0 truncate text-[0.9375rem] font-bold text-fg">
             {APP_NAME}{wings.length === 1 && <span className="font-semibold text-muted"> – {wings[0].name}</span>}
           </p>

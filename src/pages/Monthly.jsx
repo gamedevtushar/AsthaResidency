@@ -8,7 +8,7 @@ import { useData } from '../context/DataContext'
 import { useQuery } from '../hooks/useQuery'
 import { useEntries } from '../hooks/useEntries'
 import { useBalances } from '../hooks/useBalances'
-import { inr, sum, shortDate, downloadCsv, defaultPeriod } from '../lib/format'
+import { inr, inrShort, sum, shortDate, downloadCsv, defaultPeriod } from '../lib/format'
 import { monthDues } from '../lib/ledger'
 import { categoryIcon } from '../lib/icons'
 import { t, tv } from '../i18n'
@@ -72,15 +72,15 @@ export default function Monthly() {
             ))}
           </div>
         )}
-        <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 text-white shadow-sm">
+        <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 text-white shadow-sm">
           <Wallet className="size-5 shrink-0 opacity-90" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-semibold opacity-85">{t('dash.total')}</p>
             {wings.length > 1 && <p className="truncate text-[0.6875rem] opacity-75">{wingLabel}: {lb ? '—' : inr(wingBalance)}</p>}
           </div>
-          <p className="shrink-0 text-xl font-bold">{lb ? '—' : <AnimatedNumber value={total} />}</p>
+          <p className="shrink-0 text-xl font-bold whitespace-nowrap">{lb ? '—' : <AnimatedNumber value={total} />}</p>
         </div>
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-4 divide-x divide-fg/10 rounded-lg border border-fg/10 bg-surface py-1">
           <Figure label={t('mo.collectedShort')} value={sum(paid)} tone="text-ok" />
           <Figure label={t('mo.pending')} value={sum(due)} tone={due.length ? 'text-bad' : 'text-fg'} />
           <Figure label={t('income')} value={income} tone="text-ok" />
@@ -142,16 +142,16 @@ export default function Monthly() {
                 return (
                   <motion.div key={x.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i, 14) * 0.025 }}
                     onClick={editable ? () => forms.open('entry', { entry: x }) : undefined}
-                    className={cx('flex items-center gap-3 px-4 py-2.5 transition-colors', editable && 'cursor-pointer hover:bg-fg/[0.06]')}>
+                    className={cx('flex items-start gap-3 px-4 py-2.5 transition-colors', editable && 'cursor-pointer hover:bg-fg/[0.06]')}>
                     <IconTile icon={categoryIcon(x.category)} tone={isIn ? 'green' : 'red'} className="size-9" iconClass="size-[1.125rem]" />
                     <div className="min-w-0 flex-1">
-                      <p className="flex min-w-0 items-center gap-1.5 font-semibold text-fg">
-                        <span className="truncate">{tv(x.category)}</span>
+                      <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 font-semibold text-fg">
+                        <span>{tv(x.category)}</span>
                         {!x.wingId && <Badge color="gray">{t('common')}</Badge>}
                       </p>
-                      <p className="truncate text-xs text-muted">{[shortDate(x.date), x.description].filter(Boolean).join(' · ')}</p>
+                      <p className="text-xs break-words text-muted">{[shortDate(x.date), tv(x.mode), x.description].filter(Boolean).join(' · ')}</p>
                     </div>
-                    <p className={cx('shrink-0 font-bold', isIn ? 'text-ok' : 'text-fg')}>{isIn ? '+' : '−'}{inr(x.amount)}</p>
+                    <p className={cx('shrink-0 pt-0.5 font-bold whitespace-nowrap', isIn ? 'text-ok' : 'text-fg')}>{isIn ? '+' : '−'}{inr(x.amount)}</p>
                   </motion.div>
                 )
               })}
@@ -193,9 +193,9 @@ function byFloor(items) {
 
 function Figure({ label, value, tone }) {
   return (
-    <div className="min-w-0 rounded-lg border border-fg/10 bg-surface px-2 py-1.5">
-      <p className="truncate text-[0.6875rem] font-semibold text-muted">{label}</p>
-      <p className={cx('truncate text-sm font-bold', tone)}>{inr(value)}</p>
+    <div className="min-w-0 px-1 text-center leading-tight">
+      <p className="text-[0.6875rem] font-semibold text-muted">{label}</p>
+      <p className={cx('text-[0.8125rem] font-bold whitespace-nowrap tabular-nums', tone)}>{inrShort(value)}</p>
     </div>
   )
 }
