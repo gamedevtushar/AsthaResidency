@@ -1,13 +1,14 @@
 import { NavLink, Link, useLocation, useOutlet, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import { LayoutDashboard, ReceiptIndianRupee, Wallet, Building2, BarChart3, Users, LogOut, KeyRound, Plus, Menu as MenuIcon, LogIn, Eye } from 'lucide-react'
+import { LayoutDashboard, ReceiptIndianRupee, Wallet, Building2, BarChart3, Users, LogOut, KeyRound, Plus, Menu as MenuIcon, LogIn, Eye, Download } from 'lucide-react'
 import { useAuth, roleLabel } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { APP_NAME } from '../firebase'
 import { t, LangSwitch } from '../i18n'
 import { ThemeSwitch } from '../theme'
 import { pageVariants, confirmDialog, cx, Button } from './ui'
-import { forms } from './forms'
+import { forms, startInstall } from './forms'
+import { useInstall } from '../pwa'
 import LogoMark from './Logo'
 
 const NAV = [
@@ -46,6 +47,7 @@ export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const outlet = useOutlet()
+  const { canPrompt, installed } = useInstall()
   const roleText = !isLoggedIn ? roleLabel('public')
     : profile.role === 'wing_admin' ? `${roleLabel('wing_admin')} · ${wingName(profile.wingId)}` : roleLabel(profile.role)
   const nav = isSuper ? [...NAV, { to: '/users', key: 'users', icon: Users }] : NAV
@@ -77,6 +79,12 @@ export default function Layout() {
               </>}
             </NavLink>
           ))}
+          {!installed && (
+            <button type="button" onClick={() => startInstall(canPrompt)}
+              className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-[15px] font-medium text-muted transition-colors hover:bg-fg/[0.05] hover:text-fg cursor-pointer">
+              <Download className="size-[18px]" />{t('pwa.install')}
+            </button>
+          )}
         </nav>
         <div className="m-3 space-y-3 rounded-xl border border-fg/10 bg-fg/[0.03] p-3">
           <div className="flex items-center justify-between gap-2">

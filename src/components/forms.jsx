@@ -6,6 +6,7 @@ import { sendPasswordResetEmail } from 'firebase/auth'
 import {
   ReceiptIndianRupee, ArrowUpCircle, ArrowDownCircle, Home, Store, Building2, UserPlus, Users, BarChart3, KeyRound, LogOut,
   Languages, CheckCircle2, RotateCcw, Trash2, Check, Eye, EyeOff, Wand2, Copy, Share2, Crown, UserCog, Shield, Ban, Pencil, Layers, ChevronRight, X, Plus, SunMoon, LogIn, CalendarCog,
+  Download, Share, SquarePlus, Compass, EllipsisVertical, Smartphone,
 } from 'lucide-react'
 import { auth, db, createLogin, toLoginEmail, toLoginId, isRealEmail, APP_NAME } from '../firebase'
 import { useAuth, roleLabel } from '../context/AuthContext'
@@ -16,6 +17,8 @@ import { recordPayment, markUnpaid, dueId, planUnits, createUnits, createWingWit
 import { MODE_ICONS, categoryIcon } from '../lib/icons'
 import { t, tv, LangSwitch } from '../i18n'
 import { ThemeSwitch } from '../theme'
+import { useInstall, promptInstall, isIOS } from '../pwa'
+import LogoMark from './Logo'
 import { AmountInput, Button, Chips, DateField, Field, IconTile, Input, Modal, Segmented, Select, SkeletonTiles, Stepper, confirmDialog, cx, toast } from './ui'
 import { SearchBox } from './filters'
 
@@ -82,6 +85,7 @@ function QuickAddSheet({ onClose }) {
 function MoreSheet({ onClose }) {
   const { profile, isLoggedIn, isSuper, signOut } = useAuth()
   const { wingName } = useData()
+  const { canPrompt, installed } = useInstall()
   const navigate = useNavigate()
   const go = (to) => { onClose(); navigate(to) }
   const roleText = !isLoggedIn ? roleLabel('public')
@@ -100,6 +104,17 @@ function MoreSheet({ onClose }) {
   return (
     <Modal onClose={onClose} title={isLoggedIn ? profile.name : t('menu')} subtitle={roleText}>
       <div className="space-y-1">
+        {!installed && (
+          <button type="button" onClick={() => startInstall(canPrompt)}
+            className="mb-2 flex w-full items-center gap-3 rounded-2xl border border-accent/25 bg-accent/[0.07] px-3 py-3 text-left transition-colors hover:bg-accent/[0.12] cursor-pointer">
+            <LogoMark className="size-10 shrink-0" />
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-fg">{t('pwa.install')}</span>
+              <span className="block truncate text-xs text-muted">{t('pwa.installHint')}</span>
+            </span>
+            <Download className="size-5 shrink-0 text-accent-ink" />
+          </button>
+        )}
         <Row icon={Building2} label={t('nav.units')} onClick={() => go('/units')} />
         <Row icon={BarChart3} label={t('nav.reports')} onClick={() => go('/reports')} />
         {isSuper && <Row icon={Users} label={t('nav.users')} onClick={() => go('/users')} />}
@@ -877,8 +892,47 @@ function BillsForm({ period = currentPeriod(), onClose }) {
   )
 }
 
+/* ================= Install as an app ================= */
+
+/** Shows the browser's own install dialog when it allows it; otherwise step-by-step instructions. */
+export async function startInstall(canPrompt) {
+  if (!canPrompt) return forms.open('install')
+  forms.close()
+  if (await promptInstall()) toast.success(t('pwa.installed'))
+}
+
+function InstallSheet({ onClose }) {
+  const ios = isIOS()
+  const steps = ios
+    ? [[Compass, t('pwa.ios1')], [Share, t('pwa.ios2')], [SquarePlus, t('pwa.ios3')], [CheckCircle2, t('pwa.ios4')]]
+    : [[EllipsisVertical, t('pwa.and1')], [Download, t('pwa.and2')], [CheckCircle2, t('pwa.and3')]]
+  return (
+    <Modal onClose={onClose} icon={Smartphone} title={t('pwa.howTitle')} subtitle={t('pwa.installHint')}>
+      <div className="mb-4 flex items-center gap-3 rounded-2xl border border-fg/10 bg-fg/[0.03] p-3">
+        <LogoMark className="size-12 shrink-0" />
+        <div className="min-w-0">
+          <p className="truncate font-semibold text-fg">{APP_NAME}</p>
+          <p className="text-xs text-muted">{t('pwa.appNote')}</p>
+        </div>
+      </div>
+      <ol className="space-y-2">
+        {steps.map(([Icon, text], i) => (
+          <motion.li key={text} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}
+            className="flex items-center gap-3 rounded-xl border border-fg/10 p-3">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">{i + 1}</span>
+            <IconTile icon={Icon} tone="gray" className="size-9" iconClass="size-[18px]" />
+            <span className="text-[15px] text-fg">{text}</span>
+          </motion.li>
+        ))}
+      </ol>
+      <p className="mt-4 text-xs leading-relaxed text-subtle">{t('pwa.iconNote')}</p>
+    </Modal>
+  )
+}
+
 const REGISTRY = {
   bills: BillsForm,
+  install: InstallSheet,
   quickAdd: QuickAddSheet, more: MoreSheet, collect: CollectSheet, payment: PaymentForm, entry: EntryForm,
   unit: UnitForm, wing: WingWizard, wingEdit: WingEditForm, user: UserForm, password: ChangePasswordForm,
 }
