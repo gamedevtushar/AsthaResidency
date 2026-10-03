@@ -5,7 +5,7 @@ import { addDoc, collection, deleteDoc, doc, query, serverTimestamp, setDoc, upd
 import { sendPasswordResetEmail } from 'firebase/auth'
 import {
   ReceiptIndianRupee, ArrowUpCircle, ArrowDownCircle, Home, Store, Building2, UserPlus, Users, KeyRound, LogOut,
-  Languages, CheckCircle2, RotateCcw, Trash2, Check, Eye, EyeOff, Wand2, Copy, Share2, Crown, UserCog, Shield, Ban, Pencil, Layers, ChevronRight, X, Plus, SunMoon, ALargeSmall, LogIn, CalendarCog,
+  Languages, CheckCircle2, RotateCcw, Trash2, Check, Eye, EyeOff, Wand2, Copy, Share2, Crown, UserCog, Shield, Ban, Pencil, Layers, ChevronRight, X, Plus, SunMoon, ALargeSmall, Palette, LogIn, CalendarCog,
   Download, Share, SquarePlus, Compass, EllipsisVertical, Smartphone,
 } from 'lucide-react'
 import { auth, db, createLogin, toLoginEmail, toLoginId, isRealEmail } from '../firebase'
@@ -16,8 +16,8 @@ import { inr, today, dateLabel, defaultPeriod, shiftPeriod, periodLabel, PAYMENT
 import { recordPayment, markUnpaid, deleteDue, deleteWing, saveEntry, deleteEntry, restoreEntry, dueId, planUnits, createUnits, createWingWithUnits, updateWingMaintenance, saveMonthBills } from '../lib/actions'
 import { periodOf } from '../lib/ledger'
 import { MODE_ICONS, categoryIcon } from '../lib/icons'
-import { t, tv, LangSwitch } from '../i18n'
-import { ThemeSwitch, TextSizeSwitch } from '../theme'
+import { t, tv, LangSwitch, useLang } from '../i18n'
+import { ThemeSwitch, TextSizeSwitch, PaletteGrid } from '../theme'
 import { useInstall, promptInstall, isIOS } from '../pwa'
 import LogoMark from './Logo'
 import { AmountInput, Button, Chips, DateField, Field, IconTile, Input, Modal, Segmented, Select, SkeletonTiles, Stepper, confirmDialog, cx, toast } from './ui'
@@ -87,6 +87,7 @@ function MoreSheet({ onClose }) {
   const { profile, isLoggedIn, isSuper, isAdmin, signOut } = useAuth()
   const { wingName } = useData()
   const { canPrompt, installed } = useInstall()
+  const { lang } = useLang()
   const navigate = useNavigate()
   const go = (to) => { onClose(); navigate(to) }
   const roleText = !isLoggedIn ? roleLabel('public')
@@ -135,6 +136,13 @@ function MoreSheet({ onClose }) {
           <IconTile icon={ALargeSmall} tone="gray" className="size-9" iconClass="size-[1.125rem]" />
           <span className="flex-1">{t('textSize')}</span>
           <TextSizeSwitch />
+        </div>
+        <div className="rounded-2xl px-3 py-2.5">
+          <div className="mb-2.5 flex items-center gap-3 text-base text-fg">
+            <IconTile icon={Palette} tone="gray" className="size-9" iconClass="size-[1.125rem]" />
+            <span className="flex-1">{t('palette')}</span>
+          </div>
+          <PaletteGrid lang={lang} />
         </div>
         <div className="my-2 h-px bg-fg/10" />
         {isLoggedIn ? <>
@@ -935,8 +943,18 @@ function InstallSheet({ onClose }) {
   )
 }
 
+/* ================= Colour themes (desktop sidebar) ================= */
+function PaletteSheet({ onClose }) {
+  const { lang } = useLang()
+  return (
+    <Modal onClose={onClose} icon={Palette} title={t('palette')}>
+      <PaletteGrid lang={lang} />
+    </Modal>
+  )
+}
+
 const REGISTRY = {
-  bills: BillsForm,
+  bills: BillsForm, palette: PaletteSheet,
   install: InstallSheet,
   quickAdd: QuickAddSheet, more: MoreSheet, collect: CollectSheet, payment: PaymentForm, entry: EntryForm,
   unit: UnitForm, wing: WingWizard, wingEdit: WingEditForm, user: UserForm, password: ChangePasswordForm,

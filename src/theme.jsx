@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { motion } from 'motion/react'
-import { Sun, Moon, Monitor } from 'lucide-react'
+import { Sun, Moon, Monitor, Check } from 'lucide-react'
+import { PALETTES, DEFAULT_PALETTE, paletteById, paletteVars, logoSvg } from './palettes'
 
 /** Theme preference: 'light' | 'dark' | 'system'. Applied as data-theme on <html>. */
 const KEY = 'theme'
@@ -12,10 +13,54 @@ export const getThemePref = () => {
 }
 const resolve = (pref) => (pref === 'system' ? (media.matches ? 'dark' : 'light') : pref)
 
+/** Colour theme (one of 10 palettes) */
+const PAL_KEY = 'palette'
+export const getPalette = () => {
+  try { return paletteById(localStorage.getItem(PAL_KEY) || DEFAULT_PALETTE).id } catch { return DEFAULT_PALETTE }
+}
+
 export function applyTheme() {
   const theme = resolve(getThemePref())
-  document.documentElement.dataset.theme = theme
-  document.querySelector('meta[name=theme-color]')?.setAttribute('content', theme === 'dark' ? '#211710' : '#fff3e6')
+  const pal = paletteById(getPalette())
+  const root = document.documentElement
+  root.dataset.theme = theme
+  for (const [k, v] of Object.entries(paletteVars(pal, theme))) root.style.setProperty(k, v)
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', pal[theme].bar)
+  // Browser tab icon, iPhone home-screen icon and install manifest follow the theme
+  const base = import.meta.env.BASE_URL
+  document.querySelector('link[rel=icon]')?.setAttribute('href', `data:image/svg+xml,${encodeURIComponent(logoSvg(pal))}`)
+  document.querySelector('link[rel=apple-touch-icon]')?.setAttribute('href', `${base}icons/${pal.id}-180.png`)
+  document.querySelector('link[rel=manifest]')?.setAttribute('href', `${base}icons/${pal.id}.webmanifest`)
+  // Saved for the next start, so the right colours show before the app loads
+  try { localStorage.setItem('themeVars', JSON.stringify({ light: paletteVars(pal, 'light'), dark: paletteVars(pal, 'dark'), bar: { light: pal.light.bar, dark: pal.dark.bar } })) } catch { /* storage unavailable */ }
+}
+
+export function setPalette(id) {
+  try { localStorage.setItem(PAL_KEY, id) } catch { /* storage unavailable */ }
+  applyTheme()
+  listeners.forEach((l) => l())
+}
+export const usePalette = () => useSyncExternalStore((cb) => { listeners.add(cb); return () => listeners.delete(cb) }, getPalette)
+
+/** The 10 colour themes as tappable swatches */
+export function PaletteGrid({ lang = 'en' }) {
+  const current = usePalette()
+  return (
+    <div className="grid grid-cols-5 gap-2">
+      {PALETTES.map((pal) => {
+        const active = pal.id === current
+        return (
+          <button key={pal.id} type="button" onClick={() => setPalette(pal.id)} aria-pressed={active}
+            className={`flex flex-col items-center gap-1 rounded-xl p-1.5 transition-colors cursor-pointer ${active ? 'bg-accent/12 ring-2 ring-accent' : 'hover:bg-fg/[0.06]'}`}>
+            <span className="relative flex size-10 items-center justify-center rounded-xl shadow-sm" style={{ background: `linear-gradient(135deg, ${pal.logo[0]}, ${pal.logo[1]})` }}>
+              {active && <Check className="size-5 text-white" strokeWidth={3} />}
+            </span>
+            <span className="max-w-full text-[0.6875rem] font-semibold leading-tight text-muted">{pal.name[lang] || pal.name.en}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
 }
 
 export function setThemePref(pref) {

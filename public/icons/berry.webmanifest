@@ -1,0 +1,31 @@
+{
+  "id": "../",
+  "name": "Astha Residency – Maintenance",
+  "short_name": "Astha",
+  "description": "Building maintenance, bills and reports for Astha Residency",
+  "start_url": "../",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#f9f1f9",
+  "theme_color": "#2d1030",
+  "icons": [
+    {
+      "src": "berry-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "berry-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "berry-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

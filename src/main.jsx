@@ -1,4 +1,5 @@
 import { registerServiceWorker } from './pwa' // first: catches the browser's install event early
+import { applyTheme } from './theme'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
@@ -8,6 +9,7 @@ import App from './App'
 import './index.css'
 
 registerServiceWorker()
+applyTheme()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -33,6 +33,9 @@ The Main Admin then creates every other user (username, password, role, wing) fr
 ## Look & language
 Light, Dark or Auto theme and Gujarati / English, switchable from the menu (remembered on each device).
 
+## Colour themes
+Menu → **રંગ થીમ**: 10 ready-made themes (saffron, indigo, ocean, peacock, forest, violet, rose, gold, berry, graphite), each with light and dark mode. The logo, browser icon and app icon follow the theme. Themes live in `src/palettes.js`; after changing them run `node scripts/make-icons.mjs` to redraw the icons.
+
 ## Language
 Gujarati (default) and English. Switch with the **ગુ / EN** button (login page, top bar, sidebar); the choice is remembered on each device.
 All text lives in `src/i18n.jsx` – edit wording there or add another language.

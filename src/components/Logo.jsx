@@ -2,7 +2,7 @@ import { useId } from 'react'
 
 /**
  * Astha Residency mark: a capital "A" drawn as a building roof, with a warm lit window inside.
- * A = Astha, roof = residency, the light = home and faith (astha). Same artwork as public/favicon.svg.
+ * A = Astha, roof = residency, the light = home and faith (astha). Same artwork as public/favicon.svg; colours follow the chosen theme.
  */
 export default function LogoMark({ className = 'size-10', title }) {
   const id = useId()
@@ -10,8 +10,8 @@ export default function LogoMark({ className = 'size-10', title }) {
     <svg viewBox="0 0 64 64" className={className} role={title ? 'img' : undefined} aria-hidden={title ? undefined : true} aria-label={title}>
       <defs>
         <linearGradient id={`${id}-bg`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#f97316" />
-          <stop offset="1" stopColor="#c2410c" />
+          <stop offset="0" style={{ stopColor: 'var(--logo-1)' }} />
+          <stop offset="1" style={{ stopColor: 'var(--logo-2)' }} />
         </linearGradient>
       </defs>
       <rect width="64" height="64" rx="15" fill={`url(#${id}-bg)`} />
@@ -20,7 +20,7 @@ export default function LogoMark({ className = 'size-10', title }) {
       {/* Floor / crossbar */}
       <path d="M18.75 40.5 H45.25" stroke="#fff" strokeWidth="5" strokeLinecap="round" />
       {/* Lit window */}
-      <circle cx="32" cy="30.5" r="3.4" fill="#fef3c7" />
+      <circle cx="32" cy="30.5" r="3.4" style={{ fill: 'var(--logo-dot)' }} />
     </svg>
   )
 }

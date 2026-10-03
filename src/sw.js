@@ -4,8 +4,8 @@
 const VERSION = '__BUILD_ID__'
 const CACHE = `astha-${VERSION}`
 const BASE = new URL(self.registration.scope).pathname // e.g. /AsthaResidency/
-const ICON_V = 'v=3' // bump when the logo changes (also in index.html and manifest.webmanifest)
-const SHELL = [BASE, `${BASE}manifest.webmanifest?${ICON_V}`, `${BASE}favicon.svg?${ICON_V}`, `${BASE}icon-192.png?${ICON_V}`]
+// Default (saffron) theme files; other themes' icons are cached the first time they are used
+const SHELL = [BASE, `${BASE}icons/saffron.webmanifest`, `${BASE}favicon.svg?v=3`, `${BASE}icons/saffron-192.png`]
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}))

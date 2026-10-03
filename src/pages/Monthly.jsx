@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion } from 'motion/react'
 import { collection, query, where } from 'firebase/firestore'
-import { ImageDown, Plus, CalendarCog, Wallet, Layers, Building2, Rows3 } from 'lucide-react'
+import { ImageDown, Plus, CalendarCog, Wallet, Layers, Building2, Rows3, ChevronsUpDown } from 'lucide-react'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
@@ -62,15 +63,28 @@ export default function Monthly() {
     } catch (e) { toast.error(e) } finally { setSaving(false) }
   }
 
+  // Phone top bar: wing picker beside the name, total balance on the right
+  const [slots, setSlots] = useState(null)
+  useEffect(() => setSlots({ left: document.getElementById('topbar-left'), right: document.getElementById('topbar-right') }), [])
+
   if (unitsLoading) return <Spinner />
   if (!wings.length) return <EmptyState icon={Building2} title={t('mo.noUnits')} />
 
   return (
     <>
-      {/* Sticky summary: wing tabs, balance, the month in four figures */}
-      <div className="sticky top-0 z-20 -mx-4 -mt-4 mb-3 shrink-0 space-y-2 bg-bg/95 px-4 pb-2.5 pt-2.5 backdrop-blur-md sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:mt-0 lg:bg-transparent lg:px-0 lg:pt-0 lg:backdrop-blur-none">
+      {slots?.left && createPortal(wings.length > 1
+        ? <WingWheel wings={wings} value={wing} onChange={setWing} />
+        : <span className="shrink-0 text-sm font-semibold whitespace-nowrap text-muted">– {wingLabel}</span>, slots.left)}
+      {slots?.right && createPortal(
+        <div className="text-right leading-none">
+          <p className="text-[0.625rem] font-semibold text-muted">{t('dash.total')}</p>
+          <p className={cx('mt-0.5 text-[0.9375rem] font-bold whitespace-nowrap tabular-nums', total < 0 ? 'text-bad' : 'text-accent-ink')}>{lb ? '—' : <AnimatedNumber value={total} />}</p>
+        </div>, slots.right)}
+
+      {/* Sticky summary: the month in four figures (wing tabs and balance bar on wide screens) */}
+      <div className="sticky top-0 z-20 -mx-4 -mt-4 mb-3 shrink-0 space-y-2 bg-bg/95 px-4 pb-2 pt-2 backdrop-blur-md sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:mt-0 lg:bg-transparent lg:px-0 lg:pt-0 lg:backdrop-blur-none">
         {wings.length > 1 && (
-          <div className="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto">
+          <div className="no-scrollbar hidden snap-x snap-mandatory gap-2 overflow-x-auto lg:flex">
             {wings.map((w) => (
               <button key={w.id} type="button" onClick={() => setWing(w.id)}
                 className={cx('h-9 shrink-0 snap-start rounded-lg px-4 text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer',
@@ -80,7 +94,7 @@ export default function Monthly() {
             ))}
           </div>
         )}
-        <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-3.5 py-2 text-white shadow-sm">
+        <div className="hidden items-center gap-3 rounded-xl bg-[linear-gradient(90deg,var(--logo-1),var(--logo-2))] px-3.5 py-2 text-white shadow-sm lg:flex">
           <Wallet className="size-5 shrink-0 opacity-90" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-semibold opacity-85">{t('dash.total')}</p>
@@ -103,9 +117,9 @@ export default function Monthly() {
             <div className="flex shrink-0 items-center gap-2 px-2.5 pt-2.5 sm:px-3 sm:pt-3">
               <div className="flex shrink-0 rounded-lg border border-fg/10 bg-fg/[0.04] p-0.5">
                 {[['map', Building2, t('mo.viewMap')], ['list', Rows3, t('mo.viewList')]].map(([v, Icon, label]) => (
-                  <button key={v} type="button" aria-label={label} aria-pressed={view === v} onClick={() => setView(v)}
-                    className={cx('flex size-8 items-center justify-center rounded-md transition-colors cursor-pointer', view === v ? 'bg-surface text-fg shadow-sm ring-1 ring-fg/10' : 'text-subtle hover:text-fg')}>
-                    <Icon className="size-4" />
+                  <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}
+                    className={cx('flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold transition-colors cursor-pointer', view === v ? 'bg-accent text-white shadow-sm' : 'text-muted hover:text-fg')}>
+                    <Icon className="size-3.5" />{label}
                   </button>
                 ))}
               </div>
@@ -168,9 +182,36 @@ export default function Monthly() {
       {/* Month switcher, pinned just above the bottom menu */}
       <div className="sticky bottom-0 z-20 -mx-4 -mb-6 mt-3 flex shrink-0 items-center gap-2 border-t border-bar-line bg-bar px-4 py-2 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:mb-0 lg:mt-4 lg:rounded-xl lg:border lg:px-2">
         <MonthPicker value={period} onChange={setPeriod} className="h-10 min-w-0 flex-1" />
-        <IconButton icon={ImageDown} label={t('img.save')} variant="secondary" className="size-10" onClick={saveImage} disabled={saving || l1 || l2} />
+        {isAdmin && <IconButton icon={ImageDown} label={t('img.save')} variant="secondary" className="size-10" onClick={saveImage} disabled={saving || l1 || l2} />}
       </div>
     </>
+  )
+}
+
+/** Wing picker for the top bar: swipe up / down (snaps to one wing) or tap for the next wing */
+function WingWheel({ wings, value, onChange }) {
+  const ref = useRef(null)
+  const timer = useRef(0)
+  const index = Math.max(0, wings.findIndex((w) => w.id === value))
+  useEffect(() => { const el = ref.current; if (el) el.scrollTo({ top: index * el.clientHeight, behavior: 'smooth' }) }, [index])
+  const onScroll = () => {
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => {
+      const el = ref.current
+      const i = Math.round(el.scrollTop / el.clientHeight)
+      if (wings[i] && wings[i].id !== value) onChange(wings[i].id)
+    }, 120)
+  }
+  return (
+    <div className="flex shrink-0 items-center rounded-lg bg-accent/15 pl-2 pr-1 text-accent-ink">
+      <div ref={ref} onScroll={onScroll} className="no-scrollbar h-7 snap-y snap-mandatory overflow-y-auto">
+        {wings.map((w, i) => (
+          <button key={w.id} type="button" onClick={() => onChange(wings[(i + 1) % wings.length].id)}
+            className="flex h-7 snap-center items-center text-sm font-bold whitespace-nowrap cursor-pointer">{w.name}</button>
+        ))}
+      </div>
+      <ChevronsUpDown className="ml-0.5 size-3.5 shrink-0 opacity-70" />
+    </div>
   )
 }
 
@@ -183,14 +224,14 @@ function SeatMap({ rows, onPick }) {
   // Every row fills the full width; box and text size follow how many flats share a row
   const MAX = 6
   const widest = Math.min(MAX, Math.max(...floors.map((f) => f.items.length)))
-  const size = widest <= 3 ? { box: 'py-3 gap-0.5', num: 'text-lg', amt: 'text-sm' }
-    : widest === 4 ? { box: 'py-2.5 gap-0.5', num: 'text-base', amt: 'text-xs' }
-      : { box: 'py-2', num: 'text-sm', amt: 'text-[0.6875rem]' }
+  const size = widest <= 3 ? { box: 'py-2.5 gap-0.5', num: 'text-lg', amt: 'text-sm' }
+    : widest === 4 ? { box: 'py-2 gap-0.5', num: 'text-base', amt: 'text-xs' }
+      : { box: 'py-1.5', num: 'text-sm', amt: 'text-[0.6875rem]' }
   return (
     <div className="space-y-2">
       {floors.map((f, fi) => (
         <motion.div key={f.key} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fi * 0.04 }}
-          className={cx('grid gap-2', f.key === 'shop' && 'mt-3 border-t border-dashed border-fg/15 pt-3')}
+          className={cx('grid gap-2', f.key === 'shop' && 'pt-2')}
           style={{ gridTemplateColumns: `repeat(${Math.min(MAX, f.items.length)}, minmax(0, 1fr))` }}>
           {f.items.map((r) => {
             const paid = r.status === 'paid'

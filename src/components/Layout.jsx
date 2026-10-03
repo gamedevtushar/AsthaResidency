@@ -1,6 +1,6 @@
 import { NavLink, Link, useLocation, useOutlet, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import { Wallet, Building2, BarChart3, Users, LogOut, KeyRound, Plus, Menu as MenuIcon, LogIn, Eye, Download } from 'lucide-react'
+import { Wallet, Palette, Building2, BarChart3, Users, LogOut, KeyRound, Plus, Menu as MenuIcon, LogIn, Eye, Download } from 'lucide-react'
 import { useAuth, roleLabel } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { t, LangSwitch } from '../i18n'
@@ -39,7 +39,7 @@ function Logo() {
 
 export default function Layout() {
   const { profile, isLoggedIn, isSuper, isAdmin, signOut } = useAuth()
-  const { wings, wingName } = useData()
+  const { wingName } = useData()
   const location = useLocation()
   const navigate = useNavigate()
   const outlet = useOutlet()
@@ -88,6 +88,10 @@ export default function Layout() {
             <LangSwitch />
             <ThemeSwitch />
             <TextSizeSwitch />
+            <button type="button" aria-label={t('palette')} title={t('palette')} onClick={() => forms.open('palette')}
+              className="flex size-9 items-center justify-center rounded-xl border border-fg/10 bg-[linear-gradient(135deg,var(--logo-1),var(--logo-2))] text-white cursor-pointer">
+              <Palette className="size-4" />
+            </button>
           </div>
           {isLoggedIn ? (
             <>
@@ -114,12 +118,12 @@ export default function Layout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Phone top bar */}
-        {/* Slim phone top bar: logo and name (plus the wing when there is only one). Menu lives in the bottom bar. */}
+        {/* Slim phone top bar: logo and name. Pages put extra info in the two slots (Accounts: wing picker and balance). */}
         <header className="z-30 flex shrink-0 items-center gap-2 border-b border-bar-line bg-bar px-4 pb-1.5 pt-[calc(0.375rem+env(safe-area-inset-top))] lg:hidden">
           <LogoMark className="size-6 shrink-0" />
-          <p className="min-w-0 truncate text-[0.9375rem] font-bold text-fg">
-            {t('appName')}{wings.length === 1 && <span className="font-semibold text-muted"> – {wings[0].name}</span>}
-          </p>
+          <p className="min-w-0 truncate text-sm font-bold text-fg">{t('appName')}</p>
+          <div id="topbar-left" className="contents" />
+          <div id="topbar-right" className="ml-auto flex shrink-0 items-center" />
         </header>
 
         {/* The only scroll area. Desktop pages use a fixed frame and scroll inside their cards. */}

@@ -4,6 +4,7 @@ import { collection, getAggregateFromServer, query, sum as total, where } from '
 import { ChevronLeft, ChevronRight, ImageDown } from 'lucide-react'
 import { db } from '../firebase'
 import { useQuery } from '../hooks/useQuery'
+import { useAuth } from '../context/AuthContext'
 import { useEntries } from '../hooks/useEntries'
 import { inr, sum, periodLabel, currentPeriod } from '../lib/format'
 import { yearImage } from '../lib/a4image'
@@ -35,6 +36,7 @@ function useOpening(start) {
 
 /** One year on one screen: money in, money out and the balance carried forward, month by month */
 export default function Reports() {
+  const { isAdmin } = useAuth()
   const [year, setYear] = useState(thisYear())
   const periods = useMemo(() => yearPeriods(year), [year])
   const now = currentPeriod()
@@ -112,7 +114,7 @@ export default function Reports() {
         <IconButton icon={ChevronLeft} label={t('r.prevYear')} variant="secondary" className="size-10" disabled={!open?.hasEarlier} onClick={() => setYear(year - 1)} />
         <p className="min-w-0 flex-1 text-center text-base font-bold text-fg">{t('r.year', { y: year })}</p>
         <IconButton icon={ChevronRight} label={t('r.nextYear')} variant="secondary" className="size-10" disabled={year >= thisYear()} onClick={() => setYear(year + 1)} />
-        <IconButton icon={ImageDown} label={t('img.save')} variant="secondary" className="size-10" onClick={saveImage} disabled={loading || saving} />
+        {isAdmin && <IconButton icon={ImageDown} label={t('img.save')} variant="secondary" className="size-10" onClick={saveImage} disabled={loading || saving} />}
       </div>
     </>
   )

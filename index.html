@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#fff3e6" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
-    <link rel="manifest" href="/manifest.webmanifest?v=3" />
+    <link rel="apple-touch-icon" href="/icons/saffron-180.png" />
+    <link rel="manifest" href="/icons/saffron.webmanifest" />
     <meta name="apple-mobile-web-app-title" content="Astha" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -20,7 +20,12 @@
         var p = localStorage.getItem('theme') || 'system'
         var dark = p === 'dark' || (p === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-        document.querySelector('meta[name=theme-color]').setAttribute('content', dark ? '#211710' : '#fff3e6')
+        var v = JSON.parse(localStorage.getItem('themeVars') || 'null')
+        if (v) {
+          var vars = v[dark ? 'dark' : 'light']
+          for (var k in vars) document.documentElement.style.setProperty(k, vars[k])
+          document.querySelector('meta[name=theme-color]').setAttribute('content', v.bar[dark ? 'dark' : 'light'])
+        } else document.querySelector('meta[name=theme-color]').setAttribute('content', dark ? '#211710' : '#fff3e6')
         document.documentElement.dataset.text = localStorage.getItem('textSize') || 'normal'
       } catch (e) {}
     </script>
