@@ -191,26 +191,31 @@ function SeatMap({ rows, onPick }) {
   const floors = byFloor(rows)
   const numbered = floors.filter((f) => f.key !== 'shop' && f.key !== 'other')
   const building = [...[...numbered].reverse(), ...floors.filter((f) => f.key === 'other'), ...floors.filter((f) => f.key === 'shop')]
-  const cols = Math.min(6, Math.max(...building.map((f) => f.items.length)))
+  // Every row fills the full width; box and text size follow how many flats share a row
+  const MAX = 6
+  const widest = Math.min(MAX, Math.max(...building.map((f) => f.items.length)))
+  const size = widest <= 3 ? { box: 'py-3 gap-0.5', num: 'text-lg', amt: 'text-sm', icon: 'size-4' }
+    : widest === 4 ? { box: 'py-2.5 gap-0.5', num: 'text-base', amt: 'text-xs', icon: 'size-4' }
+      : { box: 'py-2', num: 'text-sm', amt: 'text-[0.6875rem]', icon: 'size-3.5' }
   const label = (r) => (r.type === 'shop' ? String(r.number).replace(/^.*?shop\s*/i, 'S') : String(r.number).replace(/^[^\d]*?-\s*/, ''))
   return (
     <div className="space-y-2">
       {building.map((f, fi) => (
         <motion.div key={f.key} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fi * 0.04 }}
           className={cx('grid gap-2', f.key === 'shop' && 'mt-3 border-t border-dashed border-fg/15 pt-3')}
-          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          style={{ gridTemplateColumns: `repeat(${Math.min(MAX, f.items.length)}, minmax(0, 1fr))` }}>
           {f.items.map((r) => {
             const paid = r.status === 'paid'
             const due = r.status === 'due'
             return (
               <button key={r.id} type="button" onClick={() => onPick(r)} title={`${r.number} · ${r.ownerName}`}
-                className={cx('flex min-w-0 flex-col items-center justify-center rounded-xl py-2 leading-tight tabular-nums shadow-sm transition-transform active:scale-95 cursor-pointer',
+                className={cx('flex min-w-0 flex-col items-center justify-center rounded-xl leading-tight tabular-nums shadow-sm transition-transform active:scale-95 cursor-pointer', size.box,
                   paid ? 'bg-gradient-to-b from-emerald-500 to-emerald-700 text-white shadow-emerald-900/30'
                     : due ? 'border border-bad/40 bg-bad/10 text-bad' : 'border border-fg/10 bg-fg/[0.04] text-subtle')}>
-                <span className="flex max-w-full items-center gap-1 truncate px-1 text-sm font-bold">
-                  {r.type === 'shop' && <Store className="size-3.5 shrink-0" />}{label(r)}
+                <span className={cx('flex max-w-full items-center gap-1 px-1 font-bold whitespace-nowrap', size.num)}>
+                  {r.type === 'shop' && <Store className={cx('shrink-0', size.icon)} />}{label(r)}
                 </span>
-                <span className={cx('max-w-full truncate px-1 text-[0.6875rem] font-semibold', paid ? 'text-white/85' : 'opacity-80')}>{inrShort(paid ? r.amount : 0)}</span>
+                <span className={cx('max-w-full px-1 font-semibold whitespace-nowrap', size.amt, paid ? 'text-white/85' : 'opacity-80')}>{inrShort(paid ? r.amount : 0)}</span>
               </button>
             )
           })}
