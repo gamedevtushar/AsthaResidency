@@ -16,11 +16,11 @@ const DEFAULT_LANG = 'gu'
 
 const en = {
   // common
-  appSub: 'Maintenance', save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', all: 'All',
-  exportCsv: 'Export CSV', signOut: 'Sign out', changePassword: 'Change password', manageUsers: 'Manage users',
+  appSub: 'Maintenance', save: 'Save', cancel: 'Cancel', delete: 'Delete', all: 'All',
+  exportCsv: 'Export CSV', signOut: 'Sign out', changePassword: 'Change password',
   errPermission: "You don't have permission to do this.", errGeneric: 'Something went wrong',
   flat: 'Flat', shop: 'Shop', flats: 'Flats', shops: 'Shops', wing: 'Wing', allWings: 'All wings',
-  common: 'Common', commonBuilding: 'Common (building)', allWingsCommon: 'All (wings + common)', unknownWing: 'Unknown wing',
+  common: 'Common', unknownWing: 'Unknown wing',
   amount: 'Amount (₹)', date: 'Date', paymentMode: 'Payment mode', perMonth: ' /month',
   income: 'Income', expense: 'Expense', expenses: 'Expenses', paid: 'Paid', unpaid: 'Unpaid',
   saved: 'Saved', deleted: 'Deleted', viewAll: 'View all', noOwner: 'No owner name', type: 'Type',
@@ -29,7 +29,6 @@ const en = {
   'confirm.title': 'Are you sure?', 'confirm.yes': 'Yes, continue', 'confirm.signOut': 'Do you want to sign out of this device?',
   undo: 'Undo', close: 'Close', downloaded: 'CSV file downloaded',
   'dash.rate': 'collected', 'dash.collectedOf': '{a} · billed {b}', 'dash.quickBills': 'Record payments',
-  'm.quickPay': 'Mark paid now (UPI, today)', 'm.generateShort': 'Generate', 'm.genTitle': 'Generate bills',
   'us.createdTitle': 'User created', 'us.copy': 'Copy login details', 'us.copied': 'Login details copied',
   'us.shareHint': 'Share these login details with the user.', 'us.generate': 'Generate password',
   'demo.badge': 'Demo mode · sample data', 'demo.hint': 'Demo logins (password {pw}):',
@@ -42,13 +41,13 @@ const en = {
   'qa.unitHint': 'One new flat or shop', 'qa.wingHint': 'A whole wing with all its flats', 'qa.userHint': 'Give someone a login',
   'collect.title': 'Collect · {month}', 'collect.subtitle': '{n} still to pay — tap a flat to record payment',
   'collect.button': 'Collect payment', 'collect.allPaid': 'Everyone has paid 🎉', 'collect.notBilled': 'Bill will be created',
-  'm.paidVia': 'Paid on {date} · {mode}', 'm.autoCreated': '{n} bills ready for {month}', 'm.autoTitle': 'Bills created automatically',
+  'm.paidVia': 'Paid on {date} · {mode}',
   'm.missingBanner': '{n} units have no bill for {month} yet', 'm.createNow': 'Create bills', 'm.paidOf': '{a}/{b} paid',
   'u.setupFirst': 'Set up first wing', 'u.addUnitsShort': 'Add flats / shops', 'u.editWingMaint': 'Edit wing & maintenance',
   'u.deleteWing': 'Delete wing', 'u.duplicate': '{n} already exists in this wing', 'u.prefix': 'Prefix',
   'u.floors': 'Floors', 'u.perFloor': 'Flats / floor', 'u.startFloor': 'First floor no.', 'u.shopCount': 'Shops',
   'u.flatAmount': 'Flat ₹ / month', 'u.shopAmount': 'Shop ₹ / month', 'u.preview': 'Preview',
-  'u.planSummary': '{f} flats + {s} shops · {amt}/month', 'u.moreN': '+{n} more', 'u.createWing': 'Create wing',
+  'u.planSummary': '{f} flats + {s} shops · {amt}/month', 'u.createWing': 'Create wing',
   'u.wingCreated': '{name}: {n} units added', 'u.addUnitsTitle': 'Add units to {name}', 'u.newWingTitle': 'New wing',
   'u.wizardSub': 'Set floors and flats — unit numbers are created for you',
   'u.maintFlats': 'Maintenance for every flat', 'u.maintShops': 'Maintenance for every shop',
@@ -70,7 +69,6 @@ const en = {
   'bills.allFlats': 'All flats (every wing)', 'bills.allShops': 'All shops (every wing)', 'bills.count': '{n} bills this month',
   'bills.save': 'Save bills', 'bills.saved': '{c} created · {u} updated', 'bills.paidKept': '{n} paid (kept)',
   'bills.mixed': 'different amounts', 'bills.each': 'as before', 'bills.createFor': 'Create bills for {month}',
-
   // nav
   'nav.dashboard': 'Dashboard', 'nav.dashboardShort': 'Home',
   'nav.maintenance': 'Maintenance', 'nav.maintenanceShort': 'Dues',
@@ -78,11 +76,8 @@ const en = {
   'nav.units': 'Wings & Units', 'nav.unitsShort': 'Units',
   'nav.reports': 'Reports', 'nav.reportsShort': 'Reports',
   'nav.users': 'Users',
-
   // roles
   'role.super_admin': 'Main Admin', 'role.wing_admin': 'Wing Admin', 'role.viewer': 'Viewer', 'role.disabled': 'Disabled',
-  'roleOpt.viewer': 'Viewer (view only)', 'roleOpt.disabled': 'Disabled (no access)',
-
   // login
   'login.hero': 'Building maintenance, clear and simple.',
   'login.heroSub': 'Track monthly maintenance, bills and balances for every wing — transparent for all residents.',
@@ -91,16 +86,11 @@ const en = {
   'login.username': 'Username', 'login.password': 'Password', 'login.signIn': 'Sign in',
   'login.help': "Don't have an account or forgot password? Contact the building admin.",
   'login.wrong': 'Wrong username or password', 'login.tooMany': 'Too many attempts. Please try again later.',
-
   // no access
-  'noAccess.title': 'No access', 'noAccess.error': 'Could not load your account',
-  'noAccess.text': 'Your account is disabled or has been removed. Please contact the building admin.',
-
   // password
   'pw.current': 'Current password', 'pw.new': 'New password', 'pw.confirm': 'Confirm new password', 'pw.change': 'Change',
   'pw.min': 'New password must be at least 6 characters', 'pw.mismatch': 'New passwords do not match',
   'pw.done': 'Password changed', 'pw.wrong': 'Current password is wrong',
-
   // dashboard
   'dash.hello': 'Hello, {name} 👋', 'dash.overview': 'Overview for {month}',
   'dash.collected': 'Maintenance collected', 'dash.unitsPaid': '{a}/{b} units paid',
@@ -110,19 +100,16 @@ const en = {
   'dash.byWing': 'Collection by wing', 'dash.noWings': 'No wings added yet.', 'dash.notBilled': 'Not billed',
   'dash.ofAmount': '{a} of {b}', 'dash.viewMaint': 'View maintenance', 'dash.recent': 'Recent income & expenses',
   'dash.noEntries': 'No entries yet',
-
   // maintenance
-  'm.subtitle': 'Monthly maintenance bills and collection', 'm.generate': 'Generate {n} bills',
-  'm.confirmGen': 'Create {n} maintenance bills for {month}?', 'm.created': '{n} bills created',
+  'm.subtitle': 'Monthly maintenance bills and collection',
   'm.totalBilled': 'Total billed', 'm.units': '{n} units', 'm.collected': 'Collected', 'm.paidN': '{n} paid',
-  'm.pending': 'Pending', 'm.unpaidN': '{n} unpaid', 'm.progress': 'Collection progress', 'm.search': 'Search unit or owner',
+  'm.pending': 'Pending', 'm.unpaidN': '{n} unpaid', 'm.search': 'Search unit or owner',
   'm.nothing': 'Nothing matches', 'm.noBills': 'No bills for {month}',
   'm.noBillsAdmin': 'Set this month\'s maintenance amount to create the bills.',
   'm.noBillsViewer': 'Bills for this month have not been created yet.',
   'm.paidOn': 'Paid on', 'm.note': 'Note (receipt no., cheque no.…)', 'm.markPaid': 'Mark paid', 'm.markUnpaid': 'Mark unpaid',
   'm.update': 'Update', 'm.deleteBill': 'Delete bill', 'm.confirmDelete': 'Delete this bill?',
   'm.markedPaid': '{unit} marked paid', 'm.markedUnpaid': 'Marked unpaid', 'm.deleted': 'Bill deleted',
-
   // accounts
   'a.subtitle': 'Bills paid and other income (maintenance is tracked separately)',
   'a.otherIncome': 'Other income', 'a.net': 'Net', 'a.search': 'Search category or note',
@@ -131,33 +118,27 @@ const en = {
   'a.addIncome': 'Add income', 'a.addExpense': 'Add expense', 'a.editIncome': 'Edit income', 'a.editExpense': 'Edit expense',
   'a.enterAmount': 'Enter an amount', 'a.confirmDelete': 'Delete this entry?',
   'a.category': 'Category', 'a.description': 'Description', 'a.descPh': 'e.g. Electricity bill Sept, vendor name',
-
   // units
-  'u.subtitle': '{w} wings · {f} flats · {s} shops', 'u.addWing': 'Add wing', 'u.bulkAdd': 'Bulk add', 'u.addUnit': 'Add unit',
+  'u.subtitle': '{w} wings · {f} flats · {s} shops', 'u.addWing': 'Add wing', 'u.addUnit': 'Add unit',
   'u.noWings': 'No wings yet', 'u.noWingsAdmin': 'Start by adding the wings of your building (e.g. A Wing, B Wing).',
-  'u.noWingsViewer': 'The admin has not added any wings yet.', 'u.addFirstWing': 'Add first wing',
+  'u.noWingsViewer': 'The admin has not added any wings yet.',
   'u.wingCount': '{f} flats · {s} shops', 'u.search': 'Search unit, owner, phone',
   'u.noUnits': 'No units found', 'u.noUnitsText': 'Add flats and shops with their monthly maintenance amount.',
   'u.confirmDelete': 'Delete unit {n}? Past maintenance records are kept.', 'u.deleted': 'Unit deleted',
   'u.removeUnitsFirst': 'Remove all units of this wing first', 'u.confirmDeleteWing': 'Delete {n}?', 'u.wingDeleted': 'Wing deleted',
-  'u.editWing': 'Edit wing', 'u.wingName': 'Wing name', 'u.wingPh': 'e.g. A Wing', 'u.wingSaved': 'Wing saved',
-  'u.editUnit': 'Edit {n}', 'u.required': 'Wing and unit number are required', 'u.unitSaved': 'Unit saved',
+  'u.wingName': 'Wing name', 'u.wingPh': 'e.g. A Wing',
+  'u.editUnit': 'Edit {n}', 'u.unitSaved': 'Unit saved',
   'u.number': 'Unit number', 'u.numberPh': 'e.g. A-101', 'u.maint': 'Usual monthly maintenance (₹)',
   'u.owner': 'Owner / resident name', 'u.phone': 'Phone',
-  'u.bulkTitle': 'Bulk add units', 'u.bulkBtn': 'Add {n} units', 'u.bulkMaint': 'Monthly maintenance for each (₹)',
-  'u.bulkNumbers': 'Unit numbers', 'u.bulkHint': 'Separate with commas or new lines.',
-  'u.bulkSkip': '{n} already exist and will be skipped.', 'u.bulkNone': 'No new unit numbers to add',
-  'u.bulkAdded': '{n} units added', 'u.bulkNote': 'Owner name and phone can be added later by editing each unit.',
-
+  'u.bulkBtn': 'Add {n} units',
   // reports
   'r.fy': 'FY {y}', 'r.whole': 'Whole building', 'r.summary': 'Monthly summary', 'r.pendingTab': 'Pending dues ({n})',
   'r.month': 'Month', 'r.billed': 'Billed', 'r.collected': 'Collected', 'r.otherInc': 'Other inc.', 'r.net': 'Net', 'r.total': 'Total',
   'r.byCategory': 'Expenses by category', 'r.noExpenses': 'No expenses this year.',
   'r.noPending': 'No pending dues 🎉', 'r.noPendingText': 'Everyone has paid for this period.',
-
   // users
   'us.count': '{n} users', 'us.add': 'Add user', 'us.none': 'No users yet', 'us.you': '(you)',
-  'us.resetTitle': 'Send password reset email', 'us.remove': 'Remove',
+  'us.remove': 'Remove',
   'us.confirmRemove': 'Remove {n}? They will no longer be able to see anything.', 'us.removed': 'User removed',
   'us.resetSent': 'Reset link sent to {e}',
   'us.forgotNote': 'Users can change their own password from the profile menu. If someone with a username (not an email) forgets their password, delete their login in Firebase Console → Authentication, then add them again here.',
@@ -166,17 +147,15 @@ const en = {
   'us.pwMin': 'Password must be at least 6 characters', 'us.added': '{n} added', 'us.updated': 'User updated',
   'us.exists': 'This username already exists. Choose another (or delete it in Firebase Console → Authentication).',
   'us.create': 'Create user', 'us.fullName': 'Full name', 'us.namePh': 'e.g. Ramesh Patel (A-101)',
-  'us.usernameHint': 'Used to log in, e.g. a101 or ramesh. You can also use an email address (then they can reset their own password).',
-  'us.passwordHint': 'At least 6 characters. Share it with the user; they can change it after logging in.',
   'us.role': 'Role', 'us.wingManage': 'Wing they manage', 'us.addWingFirst': 'Add a wing first (Wings & Units).',
 }
 
 const gu = {
-  appSub: 'મેન્ટેનન્સ', save: 'સેવ કરો', cancel: 'રદ કરો', delete: 'ડિલીટ કરો', edit: 'ફેરફાર', all: 'બધા',
-  exportCsv: 'CSV ડાઉનલોડ', signOut: 'લૉગ આઉટ', changePassword: 'પાસવર્ડ બદલો', manageUsers: 'યુઝર્સ મેનેજ કરો',
+  appSub: 'મેન્ટેનન્સ', save: 'સેવ કરો', cancel: 'રદ કરો', delete: 'ડિલીટ કરો', all: 'બધા',
+  exportCsv: 'CSV ડાઉનલોડ', signOut: 'લૉગ આઉટ', changePassword: 'પાસવર્ડ બદલો',
   errPermission: 'તમને આ કરવાની પરવાનગી નથી.', errGeneric: 'કંઈક ખોટું થયું',
   flat: 'ફ્લેટ', shop: 'દુકાન', flats: 'ફ્લેટ', shops: 'દુકાનો', wing: 'વિંગ', allWings: 'બધી વિંગ',
-  common: 'કોમન', commonBuilding: 'કોમન (બિલ્ડિંગ)', allWingsCommon: 'બધા (વિંગ + કોમન)', unknownWing: 'અજાણી વિંગ',
+  common: 'કોમન', unknownWing: 'અજાણી વિંગ',
   amount: 'રકમ (₹)', date: 'તારીખ', paymentMode: 'ચુકવણીની રીત', perMonth: ' /મહિને',
   income: 'આવક', expense: 'ખર્ચ', expenses: 'ખર્ચ', paid: 'ભર્યું', unpaid: 'બાકી',
   saved: 'સેવ થયું', deleted: 'ડિલીટ થયું', viewAll: 'બધું જુઓ', noOwner: 'માલિકનું નામ નથી', type: 'પ્રકાર',
@@ -185,7 +164,6 @@ const gu = {
   'confirm.title': 'શું તમને ખાતરી છે?', 'confirm.yes': 'હા, આગળ વધો', 'confirm.signOut': 'શું તમે આ ડિવાઇસમાંથી લૉગ આઉટ કરવા માંગો છો?',
   undo: 'પાછું કરો', close: 'બંધ કરો', downloaded: 'CSV ફાઇલ ડાઉનલોડ થઈ',
   'dash.rate': 'જમા', 'dash.collectedOf': '{a} · કુલ બિલ {b}', 'dash.quickBills': 'ચુકવણી નોંધો',
-  'm.quickPay': 'હમણાં ભર્યું ગણો (UPI, આજે)', 'm.generateShort': 'બનાવો', 'm.genTitle': 'બિલ બનાવો',
   'us.createdTitle': 'યુઝર બન્યા', 'us.copy': 'લૉગિન વિગત કૉપી કરો', 'us.copied': 'લૉગિન વિગત કૉપી થઈ',
   'us.shareHint': 'આ લૉગિન વિગત યુઝરને મોકલો.', 'us.generate': 'પાસવર્ડ બનાવો',
   'demo.badge': 'ડેમો મોડ · નમૂના ડેટા', 'demo.hint': 'ડેમો લૉગિન (પાસવર્ડ {pw}):',
@@ -198,13 +176,13 @@ const gu = {
   'qa.unitHint': 'એક નવો ફ્લેટ કે દુકાન', 'qa.wingHint': 'બધા ફ્લેટ સાથે આખી વિંગ', 'qa.userHint': 'કોઈને લૉગિન આપો',
   'collect.title': 'ઉઘરાણી · {month}', 'collect.subtitle': '{n} બાકી — ચુકવણી નોંધવા ફ્લેટ પર ટૅપ કરો',
   'collect.button': 'ચુકવણી લો', 'collect.allPaid': 'બધાએ ભરી દીધું 🎉', 'collect.notBilled': 'બિલ બની જશે',
-  'm.paidVia': '{date} ના રોજ ભર્યું · {mode}', 'm.autoCreated': '{month} માટે {n} બિલ તૈયાર', 'm.autoTitle': 'બિલ આપમેળે બન્યા',
+  'm.paidVia': '{date} ના રોજ ભર્યું · {mode}',
   'm.missingBanner': '{n} યુનિટનું {month} નું બિલ હજુ બન્યું નથી', 'm.createNow': 'બિલ બનાવો', 'm.paidOf': '{a}/{b} ભર્યા',
   'u.setupFirst': 'પહેલી વિંગ બનાવો', 'u.addUnitsShort': 'ફ્લેટ / દુકાન ઉમેરો', 'u.editWingMaint': 'વિંગ અને મેન્ટેનન્સ બદલો',
   'u.deleteWing': 'વિંગ ડિલીટ કરો', 'u.duplicate': '{n} આ વિંગમાં પહેલેથી છે', 'u.prefix': 'પ્રીફિક્સ',
   'u.floors': 'માળ', 'u.perFloor': 'ફ્લેટ / માળ', 'u.startFloor': 'પહેલા માળનો નં.', 'u.shopCount': 'દુકાનો',
   'u.flatAmount': 'ફ્લેટ ₹ / મહિને', 'u.shopAmount': 'દુકાન ₹ / મહિને', 'u.preview': 'પૂર્વાવલોકન',
-  'u.planSummary': '{f} ફ્લેટ + {s} દુકાન · {amt}/મહિને', 'u.moreN': '+{n} વધુ', 'u.createWing': 'વિંગ બનાવો',
+  'u.planSummary': '{f} ફ્લેટ + {s} દુકાન · {amt}/મહિને', 'u.createWing': 'વિંગ બનાવો',
   'u.wingCreated': '{name}: {n} યુનિટ ઉમેરાયા', 'u.addUnitsTitle': '{name} માં યુનિટ ઉમેરો', 'u.newWingTitle': 'નવી વિંગ',
   'u.wizardSub': 'માળ અને ફ્લેટ સેટ કરો — યુનિટ નંબર આપમેળે બનશે',
   'u.maintFlats': 'દરેક ફ્લેટનું મેન્ટેનન્સ', 'u.maintShops': 'દરેક દુકાનનું મેન્ટેનન્સ',
@@ -226,17 +204,13 @@ const gu = {
   'bills.allFlats': 'બધા ફ્લેટ (દરેક વિંગ)', 'bills.allShops': 'બધી દુકાનો (દરેક વિંગ)', 'bills.count': 'આ મહિને {n} બિલ',
   'bills.save': 'બિલ સેવ કરો', 'bills.saved': '{c} નવા · {u} અપડેટ', 'bills.paidKept': '{n} ભરેલા (યથાવત્)',
   'bills.mixed': 'અલગ અલગ રકમ', 'bills.each': 'પહેલાં મુજબ', 'bills.createFor': '{month} ના બિલ બનાવો',
-
   'nav.dashboard': 'ડેશબોર્ડ', 'nav.dashboardShort': 'હોમ',
   'nav.maintenance': 'મેન્ટેનન્સ', 'nav.maintenanceShort': 'મેન્ટેનન્સ',
   'nav.accounts': 'આવક અને ખર્ચ', 'nav.accountsShort': 'હિસાબ',
   'nav.units': 'વિંગ અને યુનિટ', 'nav.unitsShort': 'યુનિટ',
   'nav.reports': 'રિપોર્ટ', 'nav.reportsShort': 'રિપોર્ટ',
   'nav.users': 'યુઝર્સ',
-
   'role.super_admin': 'મુખ્ય એડમિન', 'role.wing_admin': 'વિંગ એડમિન', 'role.viewer': 'વ્યૂઅર', 'role.disabled': 'બંધ',
-  'roleOpt.viewer': 'વ્યૂઅર (ફક્ત જોવા માટે)', 'roleOpt.disabled': 'બંધ (ઍક્સેસ નહીં)',
-
   'login.hero': 'બિલ્ડિંગ મેન્ટેનન્સ, સરળ અને સ્પષ્ટ.',
   'login.heroSub': 'દરેક વિંગનું માસિક મેન્ટેનન્સ, બિલ અને બેલેન્સ — બધા રહેવાસીઓ માટે પારદર્શક.',
   'login.f1': 'એડમિન સંભાળે, રહેવાસીઓ જુએ', 'login.f2': 'વિંગ મુજબ રિપોર્ટ અને ડેશબોર્ડ', 'login.f3': 'મોબાઇલ પર સરસ ચાલે',
@@ -244,14 +218,9 @@ const gu = {
   'login.username': 'યુઝરનેમ', 'login.password': 'પાસવર્ડ', 'login.signIn': 'લૉગિન',
   'login.help': 'એકાઉન્ટ નથી કે પાસવર્ડ ભૂલી ગયા? બિલ્ડિંગ એડમિનનો સંપર્ક કરો.',
   'login.wrong': 'યુઝરનેમ અથવા પાસવર્ડ ખોટો છે', 'login.tooMany': 'ઘણા પ્રયાસો થયા. થોડી વાર પછી ફરી પ્રયાસ કરો.',
-
-  'noAccess.title': 'ઍક્સેસ નથી', 'noAccess.error': 'તમારું એકાઉન્ટ લોડ થઈ શક્યું નથી',
-  'noAccess.text': 'તમારું એકાઉન્ટ બંધ છે અથવા દૂર કરવામાં આવ્યું છે. કૃપા કરી બિલ્ડિંગ એડમિનનો સંપર્ક કરો.',
-
   'pw.current': 'હાલનો પાસવર્ડ', 'pw.new': 'નવો પાસવર્ડ', 'pw.confirm': 'નવો પાસવર્ડ ફરીથી', 'pw.change': 'બદલો',
   'pw.min': 'નવો પાસવર્ડ ઓછામાં ઓછા 6 અક્ષરનો હોવો જોઈએ', 'pw.mismatch': 'નવા પાસવર્ડ મેળ ખાતા નથી',
   'pw.done': 'પાસવર્ડ બદલાઈ ગયો', 'pw.wrong': 'હાલનો પાસવર્ડ ખોટો છે',
-
   'dash.hello': 'નમસ્તે, {name} 🙏', 'dash.overview': '{month} નો સારાંશ',
   'dash.collected': 'મેન્ટેનન્સ જમા', 'dash.unitsPaid': '{a}/{b} યુનિટે ભર્યું',
   'dash.pending': 'બાકી રકમ', 'dash.pendingSub': '{n} બિલ · છેલ્લા 6 મહિના',
@@ -260,18 +229,15 @@ const gu = {
   'dash.byWing': 'વિંગ મુજબ ઉઘરાણી', 'dash.noWings': 'હજુ કોઈ વિંગ ઉમેરી નથી.', 'dash.notBilled': 'બિલ બન્યું નથી',
   'dash.ofAmount': '{b} માંથી {a}', 'dash.viewMaint': 'મેન્ટેનન્સ જુઓ', 'dash.recent': 'તાજેતરની આવક અને ખર્ચ',
   'dash.noEntries': 'હજુ કોઈ એન્ટ્રી નથી',
-
-  'm.subtitle': 'માસિક મેન્ટેનન્સ બિલ અને ઉઘરાણી', 'm.generate': '{n} બિલ બનાવો',
-  'm.confirmGen': '{month} માટે {n} મેન્ટેનન્સ બિલ બનાવવા છે?', 'm.created': '{n} બિલ બન્યા',
+  'm.subtitle': 'માસિક મેન્ટેનન્સ બિલ અને ઉઘરાણી',
   'm.totalBilled': 'કુલ બિલ', 'm.units': '{n} યુનિટ', 'm.collected': 'જમા', 'm.paidN': '{n} ભર્યા',
-  'm.pending': 'બાકી', 'm.unpaidN': '{n} બાકી', 'm.progress': 'ઉઘરાણીની પ્રગતિ', 'm.search': 'યુનિટ અથવા માલિક શોધો',
+  'm.pending': 'બાકી', 'm.unpaidN': '{n} બાકી', 'm.search': 'યુનિટ અથવા માલિક શોધો',
   'm.nothing': 'કંઈ મળ્યું નહીં', 'm.noBills': '{month} ના કોઈ બિલ નથી',
   'm.noBillsAdmin': 'બિલ બનાવવા આ મહિનાની મેન્ટેનન્સ રકમ નક્કી કરો.',
   'm.noBillsViewer': 'આ મહિનાના બિલ હજુ બન્યા નથી.',
   'm.paidOn': 'ભર્યાની તારીખ', 'm.note': 'નોંધ (રસીદ નં., ચેક નં.…)', 'm.markPaid': 'ભર્યું ગણો', 'm.markUnpaid': 'બાકી ગણો',
   'm.update': 'અપડેટ કરો', 'm.deleteBill': 'બિલ ડિલીટ કરો', 'm.confirmDelete': 'આ બિલ ડિલીટ કરવું છે?',
   'm.markedPaid': '{unit} ભર્યું ગણાયું', 'm.markedUnpaid': 'બાકી ગણાયું', 'm.deleted': 'બિલ ડિલીટ થયું',
-
   'a.subtitle': 'ચૂકવેલા બિલ અને અન્ય આવક (મેન્ટેનન્સ અલગ રાખેલ છે)',
   'a.otherIncome': 'અન્ય આવક', 'a.net': 'ચોખ્ખું', 'a.search': 'પ્રકાર અથવા વિગત શોધો',
   'a.empty': 'કોઈ એન્ટ્રી નથી', 'a.emptyAdmin': 'લાઇટ બિલ, પગાર, રિપેરિંગ અને અન્ય આવક અહીં ઉમેરો.',
@@ -279,30 +245,24 @@ const gu = {
   'a.addIncome': 'આવક ઉમેરો', 'a.addExpense': 'ખર્ચ ઉમેરો', 'a.editIncome': 'આવકમાં ફેરફાર', 'a.editExpense': 'ખર્ચમાં ફેરફાર',
   'a.enterAmount': 'રકમ લખો', 'a.confirmDelete': 'આ એન્ટ્રી ડિલીટ કરવી છે?',
   'a.category': 'પ્રકાર', 'a.description': 'વિગત', 'a.descPh': 'દા.ત. સપ્ટેમ્બર લાઇટ બિલ, વેપારીનું નામ',
-
-  'u.subtitle': '{w} વિંગ · {f} ફ્લેટ · {s} દુકાનો', 'u.addWing': 'વિંગ ઉમેરો', 'u.bulkAdd': 'એકસાથે ઉમેરો', 'u.addUnit': 'યુનિટ ઉમેરો',
+  'u.subtitle': '{w} વિંગ · {f} ફ્લેટ · {s} દુકાનો', 'u.addWing': 'વિંગ ઉમેરો', 'u.addUnit': 'યુનિટ ઉમેરો',
   'u.noWings': 'હજુ કોઈ વિંગ નથી', 'u.noWingsAdmin': 'તમારા બિલ્ડિંગની વિંગ ઉમેરીને શરૂઆત કરો (દા.ત. A વિંગ, B વિંગ).',
-  'u.noWingsViewer': 'એડમિને હજુ કોઈ વિંગ ઉમેરી નથી.', 'u.addFirstWing': 'પહેલી વિંગ ઉમેરો',
+  'u.noWingsViewer': 'એડમિને હજુ કોઈ વિંગ ઉમેરી નથી.',
   'u.wingCount': '{f} ફ્લેટ · {s} દુકાનો', 'u.search': 'યુનિટ, માલિક, ફોન શોધો',
   'u.noUnits': 'કોઈ યુનિટ મળ્યું નહીં', 'u.noUnitsText': 'ફ્લેટ અને દુકાનો તેમના માસિક મેન્ટેનન્સ સાથે ઉમેરો.',
   'u.confirmDelete': 'યુનિટ {n} ડિલીટ કરવું છે? જૂના મેન્ટેનન્સ રેકોર્ડ રહેશે.', 'u.deleted': 'યુનિટ ડિલીટ થયું',
   'u.removeUnitsFirst': 'પહેલા આ વિંગના બધા યુનિટ દૂર કરો', 'u.confirmDeleteWing': '{n} ડિલીટ કરવી છે?', 'u.wingDeleted': 'વિંગ ડિલીટ થઈ',
-  'u.editWing': 'વિંગમાં ફેરફાર', 'u.wingName': 'વિંગનું નામ', 'u.wingPh': 'દા.ત. A વિંગ', 'u.wingSaved': 'વિંગ સેવ થઈ',
-  'u.editUnit': '{n} માં ફેરફાર', 'u.required': 'વિંગ અને યુનિટ નંબર જરૂરી છે', 'u.unitSaved': 'યુનિટ સેવ થયું',
+  'u.wingName': 'વિંગનું નામ', 'u.wingPh': 'દા.ત. A વિંગ',
+  'u.editUnit': '{n} માં ફેરફાર', 'u.unitSaved': 'યુનિટ સેવ થયું',
   'u.number': 'યુનિટ નંબર', 'u.numberPh': 'દા.ત. A-101', 'u.maint': 'સામાન્ય માસિક મેન્ટેનન્સ (₹)',
   'u.owner': 'માલિક / રહેવાસીનું નામ', 'u.phone': 'ફોન',
-  'u.bulkTitle': 'એકસાથે યુનિટ ઉમેરો', 'u.bulkBtn': '{n} યુનિટ ઉમેરો', 'u.bulkMaint': 'દરેકનું માસિક મેન્ટેનન્સ (₹)',
-  'u.bulkNumbers': 'યુનિટ નંબરો', 'u.bulkHint': 'અલ્પવિરામ (,) અથવા નવી લાઇનથી અલગ કરો.',
-  'u.bulkSkip': '{n} પહેલેથી છે, તે છોડી દેવાશે.', 'u.bulkNone': 'ઉમેરવા માટે કોઈ નવા યુનિટ નંબર નથી',
-  'u.bulkAdded': '{n} યુનિટ ઉમેરાયા', 'u.bulkNote': 'માલિકનું નામ અને ફોન પછીથી દરેક યુનિટમાં ફેરફાર કરીને ઉમેરી શકાય.',
-
+  'u.bulkBtn': '{n} યુનિટ ઉમેરો',
   'r.fy': 'નાણાકીય વર્ષ {y}', 'r.whole': 'આખું બિલ્ડિંગ', 'r.summary': 'માસિક સારાંશ', 'r.pendingTab': 'બાકી રકમ ({n})',
   'r.month': 'મહિનો', 'r.billed': 'બિલ', 'r.collected': 'જમા', 'r.otherInc': 'અન્ય આવક', 'r.net': 'ચોખ્ખું', 'r.total': 'કુલ',
   'r.byCategory': 'પ્રકાર મુજબ ખર્ચ', 'r.noExpenses': 'આ વર્ષે કોઈ ખર્ચ નથી.',
   'r.noPending': 'કોઈ રકમ બાકી નથી 🎉', 'r.noPendingText': 'આ સમયગાળા માટે બધાએ ભરી દીધું છે.',
-
   'us.count': '{n} યુઝર્સ', 'us.add': 'યુઝર ઉમેરો', 'us.none': 'હજુ કોઈ યુઝર નથી', 'us.you': '(તમે)',
-  'us.resetTitle': 'પાસવર્ડ રીસેટ ઇમેઇલ મોકલો', 'us.remove': 'દૂર કરો',
+  'us.remove': 'દૂર કરો',
   'us.confirmRemove': '{n} ને દૂર કરવા છે? પછી તેઓ કંઈ જોઈ શકશે નહીં.', 'us.removed': 'યુઝર દૂર કર્યા',
   'us.resetSent': '{e} પર રીસેટ લિંક મોકલી',
   'us.forgotNote': 'યુઝર્સ પ્રોફાઇલ મેનુમાંથી પોતાનો પાસવર્ડ બદલી શકે છે. જો યુઝરનેમવાળા (ઇમેઇલ વગરના) યુઝર પાસવર્ડ ભૂલી જાય, તો Firebase Console → Authentication માંથી તેમનું લૉગિન ડિલીટ કરી અહીં ફરીથી ઉમેરો.',
@@ -311,10 +271,7 @@ const gu = {
   'us.pwMin': 'પાસવર્ડ ઓછામાં ઓછા 6 અક્ષરનો હોવો જોઈએ', 'us.added': '{n} ઉમેરાયા', 'us.updated': 'યુઝર અપડેટ થયા',
   'us.exists': 'આ યુઝરનેમ પહેલેથી છે. બીજું પસંદ કરો (અથવા Firebase Console → Authentication માંથી ડિલીટ કરો).',
   'us.create': 'યુઝર બનાવો', 'us.fullName': 'પૂરું નામ', 'us.namePh': 'દા.ત. રમેશ પટેલ (A-101)',
-  'us.usernameHint': 'લૉગિન માટે, દા.ત. a101 અથવા ramesh. ઇમેઇલ પણ વાપરી શકાય (તો તેઓ જાતે પાસવર્ડ રીસેટ કરી શકે).',
-  'us.passwordHint': 'ઓછામાં ઓછા 6 અક્ષર. યુઝરને જણાવો; લૉગિન પછી તેઓ બદલી શકે છે.',
   'us.role': 'ભૂમિકા', 'us.wingManage': 'સંભાળવાની વિંગ', 'us.addWingFirst': 'પહેલા વિંગ ઉમેરો (વિંગ અને યુનિટ).',
-
   // database values (categories, payment modes)
   'v.Electricity': 'લાઇટ બિલ', 'v.Water': 'પાણી', 'v.Security': 'સિક્યુરિટી', 'v.Housekeeping': 'સફાઈ',
   'v.Lift Maintenance': 'લિફ્ટ મેન્ટેનન્સ', 'v.Repairs': 'રિપેરિંગ', 'v.Garden': 'બગીચો', 'v.Salary': 'પગાર',
@@ -341,9 +298,6 @@ export function t(key, vars) {
 
 /** Translate a value stored in English in the database (category, payment mode) */
 export const tv = (value) => (value ? DICTS[current][`v.${value}`] ?? value : value)
-
-/** Options list for <Select> where stored value stays English but label is translated */
-export const tOptions = (values) => values.map((v) => ({ value: v, label: tv(v) }))
 
 export const locale = () => LANGUAGES.find((l) => l.code === current).locale
 

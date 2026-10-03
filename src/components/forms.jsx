@@ -39,7 +39,6 @@ export function FormHost() {
   )
 }
 
-const firstName = (n = '') => n.split(' ')[0]
 const modeOptions = () => PAYMENT_MODES.map((m) => ({ value: m, label: tv(m), icon: MODE_ICONS[m] }))
 
 /** Big primary submit button used in every form footer */

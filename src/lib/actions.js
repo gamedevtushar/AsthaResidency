@@ -19,9 +19,6 @@ async function inBatches(items, apply, size = 400) {
   }
 }
 
-export const generateBills = (period, units) =>
-  inBatches(units, (b, u) => b.set(doc(db, 'dues', dueId(period, u.id)), newDue(u, period)))
-
 /**
  * Maintenance can differ every month. items: [{ unit, due, amount }]
  * Creates missing bills and updates the amount of UNPAID bills. Paid bills are never changed.
