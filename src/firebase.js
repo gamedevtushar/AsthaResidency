@@ -16,7 +16,6 @@ const app = initializeApp(config.apiKey ? config : { ...config, apiKey: 'not-con
 export const auth = getAuth(app)
 export const db = getFirestore(app)
 
-export const APP_NAME = import.meta.env.VITE_APP_NAME || 'Astha Residency'
 /** False when the build has no Firebase settings (e.g. the GitHub secret is missing) */
 export const firebaseConfigured = !!config.apiKey
 

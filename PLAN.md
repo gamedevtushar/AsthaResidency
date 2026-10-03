@@ -45,7 +45,7 @@ All text lives in `src/i18n.jsx` – edit wording there or add another language.
 
 ## Month-wise, not date-wise
 Every amount belongs to the month it is **for**. October's maintenance paid on 3 November counts in October.
-The actual date is kept only for the record (it appears in the CSV export). Each flat owes maintenance every month
+The actual date is kept only for the record. The image button saves an A4 picture of a month or a year (white background, current language). Each flat owes maintenance every month
 from the month it was added; nothing needs to be "generated".
 
 ## Monthly workflow

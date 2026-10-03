@@ -4,7 +4,7 @@
 const VERSION = '__BUILD_ID__'
 const CACHE = `astha-${VERSION}`
 const BASE = new URL(self.registration.scope).pathname // e.g. /AsthaResidency/
-const ICON_V = 'v=2' // bump when the logo changes (also in index.html and manifest.webmanifest)
+const ICON_V = 'v=3' // bump when the logo changes (also in index.html and manifest.webmanifest)
 const SHELL = [BASE, `${BASE}manifest.webmanifest?${ICON_V}`, `${BASE}favicon.svg?${ICON_V}`, `${BASE}icon-192.png?${ICON_V}`]
 
 self.addEventListener('install', (event) => {

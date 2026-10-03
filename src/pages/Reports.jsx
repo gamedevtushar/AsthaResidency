@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { collection, getAggregateFromServer, query, sum as total, where } from 'firebase/firestore'
-import { ChevronLeft, ChevronRight, Download } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ImageDown } from 'lucide-react'
 import { db } from '../firebase'
 import { useQuery } from '../hooks/useQuery'
 import { useEntries } from '../hooks/useEntries'
-import { inr, sum, periodLabel, currentPeriod, downloadCsv } from '../lib/format'
+import { inr, sum, periodLabel, currentPeriod } from '../lib/format'
+import { yearImage } from '../lib/a4image'
 import { periodOf } from '../lib/ledger'
 import { Card, IconButton, SkeletonList, cx, toast } from '../components/ui'
 import { t } from '../i18n'
@@ -56,14 +57,11 @@ export default function Reports() {
   const totIn = sum(rows, 'inn')
   const totOut = sum(rows, 'out')
 
-  const exportCsv = () => {
-    downloadCsv(`report-${year}.csv`, [
-      ['Month', 'In', 'Out', 'Balance'],
-      ['Brought forward', '', '', open?.opening || 0],
-      ...rows.map((r) => [periodLabel(r.p), r.inn, r.out, r.balance]),
-      ['Total', totIn, totOut, rows[11].balance],
-    ])
-    toast.info(t('downloaded'))
+  // A4 picture of the year (white background, current language) to save or share
+  const [saving, setSaving] = useState(false)
+  const saveImage = async () => {
+    setSaving(true)
+    try { await yearImage({ year, opening: open.opening, rows, totIn, totOut }) } catch (e) { toast.error(e) } finally { setSaving(false) }
   }
 
   const cell = 'px-2 py-1.5 text-right tabular-nums whitespace-nowrap'
@@ -114,7 +112,7 @@ export default function Reports() {
         <IconButton icon={ChevronLeft} label={t('r.prevYear')} variant="secondary" className="size-10" disabled={!open?.hasEarlier} onClick={() => setYear(year - 1)} />
         <p className="min-w-0 flex-1 text-center text-base font-bold text-fg">{t('r.year', { y: year })}</p>
         <IconButton icon={ChevronRight} label={t('r.nextYear')} variant="secondary" className="size-10" disabled={year >= thisYear()} onClick={() => setYear(year + 1)} />
-        <IconButton icon={Download} label={t('exportCsv')} variant="secondary" className="size-10" onClick={exportCsv} disabled={loading} />
+        <IconButton icon={ImageDown} label={t('img.save')} variant="secondary" className="size-10" onClick={saveImage} disabled={loading || saving} />
       </div>
     </>
   )

@@ -16,8 +16,8 @@ const DEFAULT_LANG = 'gu'
 
 const en = {
   // common
-  appSub: 'Maintenance', save: 'Save', cancel: 'Cancel', delete: 'Delete', all: 'All',
-  exportCsv: 'Export CSV', signOut: 'Sign out', changePassword: 'Change password',
+  appName: 'Astha Residency', appSub: 'Maintenance', save: 'Save', cancel: 'Cancel', delete: 'Delete', all: 'All',
+  signOut: 'Sign out', changePassword: 'Change password',
   errPermission: "You don't have permission to do this.", errGeneric: 'Something went wrong',
   flat: 'Flat', shop: 'Shop', flats: 'Flats', shops: 'Shops', wing: 'Wing', allWings: 'All wings',
   common: 'Common', unknownWing: 'Unknown wing',
@@ -27,7 +27,7 @@ const en = {
   errNetwork: 'No internet connection. Please try again.', errNotFound: 'This record no longer exists.',
   offline: 'You are offline. Changes will sync when you reconnect.', backOnline: 'Back online',
   'confirm.title': 'Are you sure?', 'confirm.yes': 'Yes, continue', 'confirm.signOut': 'Do you want to sign out of this device?',
-  undo: 'Undo', close: 'Close', downloaded: 'CSV file downloaded',
+  undo: 'Undo', close: 'Close',
   'us.createdTitle': 'User created', 'us.copy': 'Copy login details', 'us.copied': 'Login details copied',
   'us.shareHint': 'Share these login details with the user.', 'us.generate': 'Generate password',
   'demo.badge': 'Demo mode · sample data', 'demo.hint': 'Demo logins (password {pw}):',
@@ -100,8 +100,9 @@ const en = {
   // monthly accounts
   'mo.pending': 'Pending',
   'mo.entries': 'Income & expenses',
-  'mo.noUnits': 'No flats or shops added yet', 'mo.notDue': 'Not due',
-  'mo.collectedShort': 'Collected', 'mo.viewMap': 'Building view', 'mo.viewList': 'List view',
+  'mo.noUnits': 'No flats or shops added yet',
+  'mo.collectedShort': 'Collected', 'mo.maintenance': 'Maintenance',
+  'img.save': 'Save as image', 'img.generated': 'Made on {d}', 'img.monthBalance': 'Month balance', 'img.more': '+ {n} more', 'mo.viewMap': 'Building view', 'mo.viewList': 'List view',
   'a.forMonth': 'For which month', 'a.dateNote': 'Date (only for the record)', 'm.paidOnNote': 'Paid on (only for the record)',
   // maintenance
   'm.units': '{n} units',
@@ -146,8 +147,8 @@ const en = {
 }
 
 const gu = {
-  appSub: 'મેન્ટેનન્સ', save: 'સેવ કરો', cancel: 'રદ કરો', delete: 'ડિલીટ કરો', all: 'બધા',
-  exportCsv: 'CSV ડાઉનલોડ', signOut: 'લૉગ આઉટ', changePassword: 'પાસવર્ડ બદલો',
+  appName: 'આસ્થા રેસિડેન્સી', appSub: 'મેન્ટેનન્સ', save: 'સેવ કરો', cancel: 'રદ કરો', delete: 'ડિલીટ કરો', all: 'બધા',
+  signOut: 'લૉગ આઉટ', changePassword: 'પાસવર્ડ બદલો',
   errPermission: 'તમને આ કરવાની પરવાનગી નથી.', errGeneric: 'કંઈક ખોટું થયું',
   flat: 'ફ્લેટ', shop: 'દુકાન', flats: 'ફ્લેટ', shops: 'દુકાનો', wing: 'વિંગ', allWings: 'બધી વિંગ',
   common: 'કોમન', unknownWing: 'અજાણી વિંગ',
@@ -157,7 +158,7 @@ const gu = {
   errNetwork: 'ઇન્ટરનેટ કનેક્શન નથી. ફરી પ્રયાસ કરો.', errNotFound: 'આ રેકોર્ડ હવે અસ્તિત્વમાં નથી.',
   offline: 'તમે ઓફલાઇન છો. કનેક્શન પાછું આવતાં ફેરફારો સેવ થશે.', backOnline: 'ફરી ઓનલાઇન',
   'confirm.title': 'શું તમને ખાતરી છે?', 'confirm.yes': 'હા, આગળ વધો', 'confirm.signOut': 'શું તમે આ ડિવાઇસમાંથી લૉગ આઉટ કરવા માંગો છો?',
-  undo: 'પાછું કરો', close: 'બંધ કરો', downloaded: 'CSV ફાઇલ ડાઉનલોડ થઈ',
+  undo: 'પાછું કરો', close: 'બંધ કરો',
   'us.createdTitle': 'યુઝર બન્યા', 'us.copy': 'લૉગિન વિગત કૉપી કરો', 'us.copied': 'લૉગિન વિગત કૉપી થઈ',
   'us.shareHint': 'આ લૉગિન વિગત યુઝરને મોકલો.', 'us.generate': 'પાસવર્ડ બનાવો',
   'demo.badge': 'ડેમો મોડ · નમૂના ડેટા', 'demo.hint': 'ડેમો લૉગિન (પાસવર્ડ {pw}):',
@@ -223,8 +224,9 @@ const gu = {
   'dash.collected': 'મેન્ટેનન્સ જમા',
   'mo.pending': 'બાકી',
   'mo.entries': 'આવક અને ખર્ચ',
-  'mo.noUnits': 'હજુ કોઈ ફ્લેટ કે દુકાન ઉમેરી નથી', 'mo.notDue': 'લાગુ નથી',
-  'mo.collectedShort': 'જમા', 'mo.viewMap': 'બિલ્ડિંગ દેખાવ', 'mo.viewList': 'યાદી દેખાવ',
+  'mo.noUnits': 'હજુ કોઈ ફ્લેટ કે દુકાન ઉમેરી નથી',
+  'mo.collectedShort': 'જમા', 'mo.maintenance': 'મેન્ટેનન્સ',
+  'img.save': 'ફોટો સેવ કરો', 'img.generated': 'બનાવ્યા તારીખ {d}', 'img.monthBalance': 'મહિનાનું બેલેન્સ', 'img.more': '+ બીજી {n}', 'mo.viewMap': 'બિલ્ડિંગ દેખાવ', 'mo.viewList': 'યાદી દેખાવ',
   'a.forMonth': 'કયા મહિનાનું', 'a.dateNote': 'તારીખ (ફક્ત નોંધ માટે)', 'm.paidOnNote': 'ભર્યાની તારીખ (ફક્ત નોંધ માટે)',
   'm.units': '{n} યુનિટ',
   'm.search': 'યુનિટ અથવા માલિક શોધો',

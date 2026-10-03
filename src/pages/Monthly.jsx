@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { collection, query, where } from 'firebase/firestore'
-import { Download, Plus, CheckCircle2, CalendarCog, Wallet, Layers, Building2, Rows3 } from 'lucide-react'
+import { ImageDown, Plus, CalendarCog, Wallet, Layers, Building2, Rows3 } from 'lucide-react'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { useQuery } from '../hooks/useQuery'
 import { useEntries } from '../hooks/useEntries'
 import { useBalances } from '../hooks/useBalances'
-import { inr, inrShort, sum, shortDate, downloadCsv, defaultPeriod } from '../lib/format'
+import { inr, inrShort, sum, shortDate, defaultPeriod } from '../lib/format'
+import { monthImage } from '../lib/a4image'
 import { monthDues } from '../lib/ledger'
 import { categoryIcon } from '../lib/icons'
 import { t, tv } from '../i18n'
@@ -48,13 +49,17 @@ export default function Monthly() {
   const expense = sum(list.filter((x) => x.type === 'expense'))
   const wingLabel = wings.find((w) => w.id === wing)?.name || ''
 
-  const exportCsv = () => {
-    downloadCsv(`accounts-${wingLabel}-${period}.csv`, [
-      ['Month', 'Type', 'Unit / Category', 'Owner / Description', 'Amount', 'Status', 'Date', 'Mode'],
-      ...rows.filter((r) => r.status !== 'none').map((r) => [period, 'Maintenance', r.number, r.ownerName, r.amount, r.status === 'paid' ? 'Paid' : 'Pending', r.paidOn, r.mode]),
-      ...list.map((x) => [period, x.type === 'income' ? 'Income' : 'Expense', x.category, x.description, x.amount, x.wingId ? '' : 'Common', x.date, x.mode]),
-    ])
-    toast.info(t('downloaded'))
+  // A4 picture of this month (white background, current language) to save or share
+  const [saving, setSaving] = useState(false)
+  const saveImage = async () => {
+    setSaving(true)
+    try {
+      await monthImage({
+        wingName: wingLabel, period, entries: list, totalBalance: total,
+        figures: { collected: sum(paid), pending: sum(due), income, expense },
+        floors: building(rows).map((f) => ({ key: f.key, items: f.items.map((r) => ({ label: seatLabel(r), amount: r.amount, status: r.status })) })),
+      })
+    } catch (e) { toast.error(e) } finally { setSaving(false) }
   }
 
   if (unitsLoading) return <Spinner />
@@ -75,7 +80,7 @@ export default function Monthly() {
             ))}
           </div>
         )}
-        <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 text-white shadow-sm">
+        <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 px-3.5 py-2 text-white shadow-sm">
           <Wallet className="size-5 shrink-0 opacity-90" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-semibold opacity-85">{t('dash.total')}</p>
@@ -114,9 +119,9 @@ export default function Monthly() {
           {l1 ? <SkeletonList /> : !rows.length ? (
             <EmptyState icon={Layers} title={t('mo.noUnits')} />
           ) : view === 'map' ? <SeatMap rows={rows} onPick={pick} /> : (
-            <div className="divide-y divide-fg/10">
-              {byFloor(rows).map((f) => (
-                <div key={f.key} className="space-y-1.5 py-2 first:pt-0 last:pb-0">
+            <div className="space-y-2">
+              {byFloor(rows).map((f, fi) => (
+                <div key={f.key} className={cx('space-y-1 rounded-xl border-l-4 p-1.5', FLOOR_COLORS[fi % FLOOR_COLORS.length])}>
                   {f.items.map((r, i) => <UnitRow key={r.id} row={r} index={i} onClick={() => pick(r)} />)}
                 </div>
               ))}
@@ -163,7 +168,7 @@ export default function Monthly() {
       {/* Month switcher, pinned just above the bottom menu */}
       <div className="sticky bottom-0 z-20 -mx-4 -mb-6 mt-3 flex shrink-0 items-center gap-2 border-t border-bar-line bg-bar px-4 py-2 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:mb-0 lg:mt-4 lg:rounded-xl lg:border lg:px-2">
         <MonthPicker value={period} onChange={setPeriod} className="h-10 min-w-0 flex-1" />
-        <IconButton icon={Download} label={t('exportCsv')} variant="secondary" className="size-10" onClick={exportCsv} />
+        <IconButton icon={ImageDown} label={t('img.save')} variant="secondary" className="size-10" onClick={saveImage} disabled={saving || l1 || l2} />
       </div>
     </>
   )
@@ -174,18 +179,16 @@ export default function Monthly() {
  * Each box shows the flat number and the amount paid (₹0 while pending), so a whole wing fits on one screen.
  */
 function SeatMap({ rows, onPick }) {
-  const floors = byFloor(rows)
-  const numbered = floors.filter((f) => f.key !== 'shop' && f.key !== 'other')
-  const building = [...[...numbered].reverse(), ...floors.filter((f) => f.key === 'other'), ...floors.filter((f) => f.key === 'shop')]
+  const floors = building(rows)
   // Every row fills the full width; box and text size follow how many flats share a row
   const MAX = 6
-  const widest = Math.min(MAX, Math.max(...building.map((f) => f.items.length)))
+  const widest = Math.min(MAX, Math.max(...floors.map((f) => f.items.length)))
   const size = widest <= 3 ? { box: 'py-3 gap-0.5', num: 'text-lg', amt: 'text-sm' }
     : widest === 4 ? { box: 'py-2.5 gap-0.5', num: 'text-base', amt: 'text-xs' }
       : { box: 'py-2', num: 'text-sm', amt: 'text-[0.6875rem]' }
   return (
     <div className="space-y-2">
-      {building.map((f, fi) => (
+      {floors.map((f, fi) => (
         <motion.div key={f.key} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: fi * 0.04 }}
           className={cx('grid gap-2', f.key === 'shop' && 'mt-3 border-t border-dashed border-fg/15 pt-3')}
           style={{ gridTemplateColumns: `repeat(${Math.min(MAX, f.items.length)}, minmax(0, 1fr))` }}>
@@ -206,6 +209,19 @@ function SeatMap({ rows, onPick }) {
       ))}
     </div>
   )
+}
+
+/** Each floor gets its own colour band in the list view */
+const FLOOR_COLORS = [
+  'border-sky-500/70 bg-sky-500/[0.07]', 'border-violet-500/70 bg-violet-500/[0.07]', 'border-amber-500/70 bg-amber-500/[0.07]',
+  'border-teal-500/70 bg-teal-500/[0.07]', 'border-pink-500/70 bg-pink-500/[0.07]', 'border-lime-500/70 bg-lime-500/[0.07]',
+]
+
+/** Floors as in a real building: top floor first, then units without a floor, shops at the bottom */
+function building(rows) {
+  const floors = byFloor(rows)
+  const numbered = floors.filter((f) => f.key !== 'shop' && f.key !== 'other')
+  return [...numbered.reverse(), ...floors.filter((f) => f.key === 'other'), ...floors.filter((f) => f.key === 'shop')]
 }
 
 /** Group a wing's units by floor: "A-203" → floor 2; then anything without a floor; shops last */
@@ -232,21 +248,14 @@ function Figure({ label, value, tone }) {
 /** One slim full-width row per flat: number, owner, amount, paid date or pending */
 function UnitRow({ row: r, index, onClick }) {
   const paid = r.status === 'paid'
-  const due = r.status === 'due'
   return (
     <motion.button type="button" onClick={onClick}
-      initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index, 20) * 0.012 }}
-      className={cx('flex w-full min-w-0 items-center gap-3 rounded-lg border-l-4 py-2 pl-2.5 pr-3 text-left transition-colors cursor-pointer',
-        paid ? 'border-emerald-500 bg-ok/[0.07] hover:bg-ok/[0.12]' : due ? 'border-bad bg-bad/[0.06] hover:bg-bad/[0.11]' : 'border-fg/20 bg-fg/[0.03] hover:bg-fg/[0.06]')}>
-      <span className="w-14 shrink-0 font-bold text-fg">{seatLabel(r)}</span>
-      <span className="min-w-0 flex-1 text-sm break-words text-muted">{r.ownerName || '—'}</span>
-      <span className="shrink-0 text-right leading-tight">
-        <span className={cx('block text-sm font-bold whitespace-nowrap', paid ? 'text-ok' : due ? 'text-fg' : 'text-subtle')}>{inr(paid ? r.amount : 0)}</span>
-        <span className={cx('flex items-center justify-end gap-1 text-xs font-semibold whitespace-nowrap', paid ? 'text-ok' : due ? 'text-bad' : 'text-subtle')}>
-          {paid && <CheckCircle2 className="size-3.5 shrink-0" />}
-          {paid ? (r.paidOn ? shortDate(r.paidOn) : t('paid')) : due ? t('unpaid') : t('mo.notDue')}
-        </span>
-      </span>
+      initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index, 20) * 0.012 }}
+      className={cx('flex w-full min-w-0 items-center gap-3 rounded-lg px-3 py-1.5 text-left transition-colors cursor-pointer',
+        paid ? 'bg-surface/80 hover:bg-surface' : 'bg-surface/50 hover:bg-surface/80')}>
+      <span className="w-16 shrink-0 font-bold text-fg">{seatLabel(r)}</span>
+      <span className="min-w-0 flex-1 text-sm whitespace-nowrap text-muted">{paid && r.paidOn ? shortDate(r.paidOn) : ''}</span>
+      <span className={cx('shrink-0 font-bold whitespace-nowrap tabular-nums', paid ? 'text-ok' : r.status === 'due' ? 'text-bad' : 'text-subtle')}>{inr(paid ? r.amount : 0)}</span>
     </motion.button>
   )
 }

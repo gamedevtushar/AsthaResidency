@@ -63,18 +63,6 @@ export const sum = (arr, key = 'amount') => arr.reduce((t, x) => t + (Number(x[k
 /** Natural sort for unit numbers like "A-101", "A-1002", "Shop 3" */
 export const byNumber = (a, b) => String(a.number).localeCompare(String(b.number), undefined, { numeric: true })
 
-export function downloadCsv(filename, rows) {
-  const csv = rows
-    .map((r) => r.map((c) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(','))
-    .join('\n')
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(a.href)
-}
-
 export const PAYMENT_MODES = ['Cash', 'UPI', 'Bank Transfer', 'Cheque']
 
 export const EXPENSE_CATEGORIES = [

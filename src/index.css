@@ -46,46 +46,46 @@
 
 :root {
   color-scheme: light;
-  --c-bg: #eef2f7;
-  --c-fg: #0f172a;
-  --c-muted: #475569;
-  --c-subtle: #64748b;
+  --c-bg: #f6f3ee;
+  --c-fg: #1c1917;
+  --c-muted: #57534e;
+  --c-subtle: #78716c;
   --c-surface: #ffffff;
-  --c-accent: #4f46e5;
-  --c-accent-ink: #4338ca;
+  --c-accent: #c2410c;
+  --c-accent-ink: #9a3412;
   --c-ok: #047857;
   --c-bad: #be123c;
-  --c-warn: #b45309;
+  --c-warn: #a16207;
   --c-info: #0369a1;
-  --c-bar: #e3e7fd;
-  --c-bar-line: rgb(79 70 229 / 0.16);
+  --c-bar: #fff3e6;
+  --c-bar-line: rgb(194 65 12 / 0.16);
   --c-bar-pill: #ffffff;
-  --glass-bg: rgb(255 255 255 / 0.82);
-  --glass-strong-bg: rgb(255 255 255 / 0.97);
-  --glass-border: rgb(15 23 42 / 0.08);
-  --glass-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.14);
+  --glass-bg: rgb(255 255 255 / 0.86);
+  --glass-strong-bg: rgb(255 255 255 / 0.98);
+  --glass-border: rgb(28 25 23 / 0.08);
+  --glass-shadow: 0 1px 2px rgb(28 25 23 / 0.04), 0 8px 24px -12px rgb(120 53 15 / 0.16);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --c-bg: #0b1120;
-  --c-fg: #e5e9f0;
-  --c-muted: #9aa6b8;
-  --c-subtle: #7d8aa0;
-  --c-surface: #141d2f;
-  --c-accent: #6366f1;
-  --c-accent-ink: #a5b4fc;
+  --c-bg: #12100e;
+  --c-fg: #f5f5f4;
+  --c-muted: #a8a29e;
+  --c-subtle: #8a817c;
+  --c-surface: #1c1917;
+  --c-accent: #ea580c;
+  --c-accent-ink: #fdba74;
   --c-ok: #34d399;
   --c-bad: #fb7185;
-  --c-warn: #fbbf24;
+  --c-warn: #facc15;
   --c-info: #38bdf8;
-  --c-bar: #1b2046;
-  --c-bar-line: rgb(129 140 248 / 0.18);
-  --c-bar-pill: rgb(99 102 241 / 0.24);
-  --glass-bg: rgb(20 29 47 / 0.78);
-  --glass-strong-bg: rgb(20 29 47 / 0.98);
-  --glass-border: rgb(148 163 184 / 0.13);
-  --glass-shadow: 0 10px 30px -14px rgb(0 0 0 / 0.6);
+  --c-bar: #211710;
+  --c-bar-line: rgb(251 146 60 / 0.16);
+  --c-bar-pill: rgb(234 88 12 / 0.22);
+  --glass-bg: rgb(28 25 23 / 0.8);
+  --glass-strong-bg: rgb(28 25 23 / 0.98);
+  --glass-border: rgb(214 211 209 / 0.1);
+  --glass-shadow: 0 10px 30px -14px rgb(0 0 0 / 0.65);
 }
 
 /* Text size option in the menu: everything is sized in rem, so this scales the whole app */

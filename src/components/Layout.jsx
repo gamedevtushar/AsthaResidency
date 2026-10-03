@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react'
 import { Wallet, Building2, BarChart3, Users, LogOut, KeyRound, Plus, Menu as MenuIcon, LogIn, Eye, Download } from 'lucide-react'
 import { useAuth, roleLabel } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
-import { APP_NAME } from '../firebase'
 import { t, LangSwitch } from '../i18n'
 import { ThemeSwitch, TextSizeSwitch } from '../theme'
 import { pageVariants, confirmDialog, cx, Button } from './ui'
@@ -31,7 +30,7 @@ function Logo() {
     <Link to="/" className="flex min-w-0 items-center gap-3">
       <LogoMark className="size-10 shrink-0" />
       <div className="min-w-0 leading-tight">
-        <p className="truncate text-base font-bold text-fg">{APP_NAME}</p>
+        <p className="truncate text-base font-bold text-fg">{t('appName')}</p>
         <p className="truncate text-xs text-muted">{t('appSub')}</p>
       </div>
     </Link>
@@ -119,7 +118,7 @@ export default function Layout() {
         <header className="z-30 flex shrink-0 items-center gap-2 border-b border-bar-line bg-bar px-4 pb-1.5 pt-[calc(0.375rem+env(safe-area-inset-top))] lg:hidden">
           <LogoMark className="size-6 shrink-0" />
           <p className="min-w-0 truncate text-[0.9375rem] font-bold text-fg">
-            {APP_NAME}{wings.length === 1 && <span className="font-semibold text-muted"> – {wings[0].name}</span>}
+            {t('appName')}{wings.length === 1 && <span className="font-semibold text-muted"> – {wings[0].name}</span>}
           </p>
         </header>
 

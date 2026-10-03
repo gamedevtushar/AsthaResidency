@@ -8,7 +8,7 @@ import {
   Languages, CheckCircle2, RotateCcw, Trash2, Check, Eye, EyeOff, Wand2, Copy, Share2, Crown, UserCog, Shield, Ban, Pencil, Layers, ChevronRight, X, Plus, SunMoon, ALargeSmall, LogIn, CalendarCog,
   Download, Share, SquarePlus, Compass, EllipsisVertical, Smartphone,
 } from 'lucide-react'
-import { auth, db, createLogin, toLoginEmail, toLoginId, isRealEmail, APP_NAME } from '../firebase'
+import { auth, db, createLogin, toLoginEmail, toLoginId, isRealEmail } from '../firebase'
 import { useAuth, roleLabel } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { useQuery } from '../hooks/useQuery'
@@ -727,12 +727,12 @@ function UserForm({ user, onClose }) {
 }
 
 function UserCreated({ name, loginId, password, onClose }) {
-  const text = `${APP_NAME}\n${location.origin}${import.meta.env.BASE_URL}\n${t('login.username')}: ${loginId}\n${t('login.password')}: ${password}`
+  const text = `${t('appName')}\n${location.origin}${import.meta.env.BASE_URL}\n${t('login.username')}: ${loginId}\n${t('login.password')}: ${password}`
   const copy = async () => {
     try { await navigator.clipboard.writeText(text); toast.success(t('us.copied')) } catch { toast.error(t('errGeneric')) }
   }
   const share = async () => {
-    try { await navigator.share({ title: APP_NAME, text }) } catch (err) { if (err?.name !== 'AbortError') copy() }
+    try { await navigator.share({ title: t('appName'), text }) } catch (err) { if (err?.name !== 'AbortError') copy() }
   }
   return (
     <Modal onClose={onClose} title={t('us.createdTitle')}
@@ -916,7 +916,7 @@ function InstallSheet({ onClose }) {
       <div className="mb-4 flex items-center gap-3 rounded-2xl border border-fg/10 bg-fg/[0.03] p-3">
         <LogoMark className="size-12 shrink-0" />
         <div className="min-w-0">
-          <p className="truncate font-semibold text-fg">{APP_NAME}</p>
+          <p className="truncate font-semibold text-fg">{t('appName')}</p>
           <p className="text-xs text-muted">{t('pwa.appNote')}</p>
         </div>
       </div>
