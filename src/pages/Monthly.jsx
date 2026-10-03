@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { collection, query, where } from 'firebase/firestore'
-import { Download, Plus, CheckCircle2, CalendarCog, Store, Wallet, Layers, Building2, Rows3 } from 'lucide-react'
+import { Download, Plus, CheckCircle2, CalendarCog, Wallet, Layers, Building2, Rows3 } from 'lucide-react'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
@@ -30,9 +30,7 @@ export default function Monthly() {
   const months = useMemo(() => [period], [period])
   const [view, setView] = useState('map') // building view first, list on request
   // Admins record a payment; everyone else just sees the details
-  const pick = (r) => (canEdit(r.wingId)
-    ? forms.open('payment', { due: r.due, unit: r.unit, period })
-    : toast.info(`${r.ownerName || '—'} · ${r.status === 'paid' ? `${t('paid')} ${shortDate(r.paidOn)}` : r.status === 'due' ? t('unpaid') : t('mo.notDue')}`, { title: `${r.number} · ${inr(r.amount)}` }))
+  const pick = (r) => canEdit(r.wingId) && forms.open('payment', { due: r.due, unit: r.unit, period })
 
   const { rows: balances, loading: lb } = useBalances(unitsLoading ? [] : wings)
   const { data: dues, loading: l1 } = useQuery(() => query(collection(db, 'dues'), where('period', '==', period)), [period])
@@ -116,24 +114,12 @@ export default function Monthly() {
           {l1 ? <SkeletonList /> : !rows.length ? (
             <EmptyState icon={Layers} title={t('mo.noUnits')} />
           ) : view === 'map' ? <SeatMap rows={rows} onPick={pick} /> : (
-            <div className="space-y-2.5">
-              {byFloor(rows).map((f, fi) => {
-                const c = FLOOR_COLORS[fi % FLOOR_COLORS.length]
-                return (
-                  <div key={f.key} className={cx('rounded-xl border-l-4 p-2', c.band)}>
-                    <div className="mb-1.5 flex items-center justify-between gap-2">
-                      <span className={cx('inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-bold text-white', c.pill)}>
-                        {f.key === 'shop' ? <Store className="size-3.5" /> : <Layers className="size-3.5" />}
-                        {f.key === 'shop' ? t('shops') : f.key === 'other' ? t('mo.others') : t('mo.floor', { n: f.key })}
-                      </span>
-                      <span className="text-xs font-semibold text-muted">{t('mo.paidOf', { a: f.items.filter((r) => r.status === 'paid').length, b: f.items.filter((r) => r.status !== 'none').length })}</span>
-                    </div>
-                    <div className="space-y-1.5">
-                      {f.items.map((r, i) => <UnitRow key={r.id} row={r} index={i} onClick={() => pick(r)} />)}
-                    </div>
-                  </div>
-                )
-              })}
+            <div className="divide-y divide-fg/10">
+              {byFloor(rows).map((f) => (
+                <div key={f.key} className="space-y-1.5 py-2 first:pt-0 last:pb-0">
+                  {f.items.map((r, i) => <UnitRow key={r.id} row={r} index={i} onClick={() => pick(r)} />)}
+                </div>
+              ))}
             </div>
           )}
         </ScrollCard>
@@ -194,10 +180,9 @@ function SeatMap({ rows, onPick }) {
   // Every row fills the full width; box and text size follow how many flats share a row
   const MAX = 6
   const widest = Math.min(MAX, Math.max(...building.map((f) => f.items.length)))
-  const size = widest <= 3 ? { box: 'py-3 gap-0.5', num: 'text-lg', amt: 'text-sm', icon: 'size-4' }
-    : widest === 4 ? { box: 'py-2.5 gap-0.5', num: 'text-base', amt: 'text-xs', icon: 'size-4' }
-      : { box: 'py-2', num: 'text-sm', amt: 'text-[0.6875rem]', icon: 'size-3.5' }
-  const label = (r) => (r.type === 'shop' ? String(r.number).replace(/^.*?shop\s*/i, 'S') : String(r.number).replace(/^[^\d]*?-\s*/, ''))
+  const size = widest <= 3 ? { box: 'py-3 gap-0.5', num: 'text-lg', amt: 'text-sm' }
+    : widest === 4 ? { box: 'py-2.5 gap-0.5', num: 'text-base', amt: 'text-xs' }
+      : { box: 'py-2', num: 'text-sm', amt: 'text-[0.6875rem]' }
   return (
     <div className="space-y-2">
       {building.map((f, fi) => (
@@ -212,9 +197,7 @@ function SeatMap({ rows, onPick }) {
                 className={cx('flex min-w-0 flex-col items-center justify-center rounded-xl leading-tight tabular-nums shadow-sm transition-transform active:scale-95 cursor-pointer', size.box,
                   paid ? 'bg-gradient-to-b from-emerald-500 to-emerald-700 text-white shadow-emerald-900/30'
                     : due ? 'border border-bad/40 bg-bad/10 text-bad' : 'border border-fg/10 bg-fg/[0.04] text-subtle')}>
-                <span className={cx('flex max-w-full items-center gap-1 px-1 font-bold whitespace-nowrap', size.num)}>
-                  {r.type === 'shop' && <Store className={cx('shrink-0', size.icon)} />}{label(r)}
-                </span>
+                <span className={cx('max-w-full px-1 text-center font-bold break-words', r.type === 'shop' ? size.amt : size.num)}>{seatLabel(r)}</span>
                 <span className={cx('max-w-full px-1 font-semibold whitespace-nowrap', size.amt, paid ? 'text-white/85' : 'opacity-80')}>{inrShort(paid ? r.amount : 0)}</span>
               </button>
             )
@@ -224,16 +207,6 @@ function SeatMap({ rows, onPick }) {
     </div>
   )
 }
-
-/** Each floor gets its own colour band so flats are easy to tell apart */
-const FLOOR_COLORS = [
-  { band: 'border-sky-500/70 bg-sky-500/[0.06]', pill: 'bg-sky-600', text: 'text-sky-600 dark:text-sky-400' },
-  { band: 'border-violet-500/70 bg-violet-500/[0.06]', pill: 'bg-violet-600', text: 'text-violet-600 dark:text-violet-400' },
-  { band: 'border-amber-500/70 bg-amber-500/[0.06]', pill: 'bg-amber-600', text: 'text-amber-600 dark:text-amber-400' },
-  { band: 'border-teal-500/70 bg-teal-500/[0.06]', pill: 'bg-teal-600', text: 'text-teal-600 dark:text-teal-400' },
-  { band: 'border-pink-500/70 bg-pink-500/[0.06]', pill: 'bg-pink-600', text: 'text-pink-600 dark:text-pink-400' },
-  { band: 'border-lime-500/70 bg-lime-500/[0.06]', pill: 'bg-lime-600', text: 'text-lime-600 dark:text-lime-400' },
-]
 
 /** Group a wing's units by floor: "A-203" → floor 2; then anything without a floor; shops last */
 function byFloor(items) {
@@ -263,15 +236,24 @@ function UnitRow({ row: r, index, onClick }) {
   return (
     <motion.button type="button" onClick={onClick}
       initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index, 20) * 0.012 }}
-      className={cx('flex w-full min-w-0 items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-colors',
-        paid ? 'border-ok/25 bg-ok/[0.07] enabled:hover:bg-ok/[0.13]' : due ? 'border-bad/25 bg-bad/[0.06] enabled:hover:bg-bad/[0.12]' : 'border-fg/10 bg-fg/[0.03] enabled:hover:bg-fg/[0.07]', 'cursor-pointer')}>
-      <span className="w-16 shrink-0 truncate font-bold text-fg">{r.number}</span>
-      <span className="min-w-0 flex-1 truncate text-sm text-muted">{r.ownerName.split(' ')[0] || '—'}</span>
-      <span className={cx('shrink-0 text-sm font-bold', paid ? 'text-ok' : due ? 'text-fg' : 'text-subtle')}>{inr(r.amount)}</span>
-      <span className={cx('flex w-[4.75rem] shrink-0 items-center justify-end gap-1 text-xs font-semibold', paid ? 'text-ok' : due ? 'text-bad' : 'text-subtle')}>
-        {paid && <CheckCircle2 className="size-3.5 shrink-0" />}
-        <span className="truncate">{paid ? (r.paidOn ? shortDate(r.paidOn) : t('paid')) : due ? t('unpaid') : t('mo.notDue')}</span>
+      className={cx('flex w-full min-w-0 items-center gap-3 rounded-lg border-l-4 py-2 pl-2.5 pr-3 text-left transition-colors cursor-pointer',
+        paid ? 'border-emerald-500 bg-ok/[0.07] hover:bg-ok/[0.12]' : due ? 'border-bad bg-bad/[0.06] hover:bg-bad/[0.11]' : 'border-fg/20 bg-fg/[0.03] hover:bg-fg/[0.06]')}>
+      <span className="w-14 shrink-0 font-bold text-fg">{seatLabel(r)}</span>
+      <span className="min-w-0 flex-1 text-sm break-words text-muted">{r.ownerName || '—'}</span>
+      <span className="shrink-0 text-right leading-tight">
+        <span className={cx('block text-sm font-bold whitespace-nowrap', paid ? 'text-ok' : due ? 'text-fg' : 'text-subtle')}>{inr(paid ? r.amount : 0)}</span>
+        <span className={cx('flex items-center justify-end gap-1 text-xs font-semibold whitespace-nowrap', paid ? 'text-ok' : due ? 'text-bad' : 'text-subtle')}>
+          {paid && <CheckCircle2 className="size-3.5 shrink-0" />}
+          {paid ? (r.paidOn ? shortDate(r.paidOn) : t('paid')) : due ? t('unpaid') : t('mo.notDue')}
+        </span>
       </span>
     </motion.button>
   )
+}
+
+/** Short name on screen: "A-101" → "101", "Shop 3" → "Shop 3" / "દુકાન 3" */
+function seatLabel(r) {
+  const n = String(r.number)
+  if (r.type === 'shop') return `${t('shop')} ${n.match(/(\d+)\s*$/)?.[1] ?? n}`
+  return n.replace(/^[^\d]*?-\s*/, '')
 }
