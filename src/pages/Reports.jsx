@@ -10,13 +10,9 @@ import { periodOf } from '../lib/ledger'
 import { Card, IconButton, SkeletonList, cx, toast } from '../components/ui'
 import { t } from '../i18n'
 
-/** Indian financial year: April → March */
-const fyStart = () => { const d = new Date(); return d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1 }
-const fyPeriods = (y) => Array.from({ length: 12 }, (_, i) => {
-  const m = ((3 + i) % 12) + 1
-  return `${m >= 4 ? y : y + 1}-${String(m).padStart(2, '0')}`
-})
-const fyName = (y) => `${y}-${String(y + 1).slice(2)}`
+/** Calendar year: January → December */
+const thisYear = () => new Date().getFullYear()
+const yearPeriods = (y) => Array.from({ length: 12 }, (_, i) => `${y}-${String(i + 1).padStart(2, '0')}`)
 
 /** Money brought forward into a year: everything before its first month */
 const before = (name, field, value, start) =>
@@ -36,10 +32,10 @@ function useOpening(start) {
   return state
 }
 
-/** One financial year on one screen: money in, money out and the balance carried forward, month by month */
+/** One year on one screen: money in, money out and the balance carried forward, month by month */
 export default function Reports() {
-  const [year, setYear] = useState(fyStart())
-  const periods = useMemo(() => fyPeriods(year), [year])
+  const [year, setYear] = useState(thisYear())
+  const periods = useMemo(() => yearPeriods(year), [year])
   const now = currentPeriod()
 
   const { data: dues, loading: l1 } = useQuery(() => query(collection(db, 'dues'), where('period', 'in', periods)), [year])
@@ -61,7 +57,7 @@ export default function Reports() {
   const totOut = sum(rows, 'out')
 
   const exportCsv = () => {
-    downloadCsv(`report-FY${fyName(year)}.csv`, [
+    downloadCsv(`report-${year}.csv`, [
       ['Month', 'In', 'Out', 'Balance'],
       ['Brought forward', '', '', open?.opening || 0],
       ...rows.map((r) => [periodLabel(r.p), r.inn, r.out, r.balance]),
@@ -73,15 +69,7 @@ export default function Reports() {
   const cell = 'px-2 py-1.5 text-right tabular-nums whitespace-nowrap'
   return (
     <>
-      {/* Year switcher */}
-      <div className="mb-3 flex shrink-0 items-center gap-2">
-        <IconButton icon={ChevronLeft} label={t('r.prevYear')} variant="secondary" className="size-10" disabled={!open?.hasEarlier} onClick={() => setYear(year - 1)} />
-        <p className="min-w-0 flex-1 text-center text-base font-bold text-fg">{t('r.fy', { y: fyName(year) })}</p>
-        <IconButton icon={ChevronRight} label={t('r.nextYear')} variant="secondary" className="size-10" disabled={year >= fyStart()} onClick={() => setYear(year + 1)} />
-        <IconButton icon={Download} label={t('exportCsv')} variant="secondary" className="size-10" onClick={exportCsv} disabled={loading} />
-      </div>
-
-      <Card className="shrink-0 overflow-hidden">
+      <Card className="mb-3 shrink-0 overflow-hidden">
         {loading ? <SkeletonList rows={8} /> : (
           <motion.table key={year} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full table-fixed text-[0.8125rem]">
             <colgroup><col className="w-[24%]" /><col /><col /><col /></colgroup>
@@ -120,6 +108,14 @@ export default function Reports() {
           </motion.table>
         )}
       </Card>
+
+      {/* Year switcher, pinned just above the bottom menu */}
+      <div className="sticky bottom-0 z-20 -mx-4 -mb-6 mt-auto flex shrink-0 items-center gap-2 border-t border-bar-line bg-bar px-4 py-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:mb-0 lg:mt-4 lg:rounded-xl lg:border lg:px-2">
+        <IconButton icon={ChevronLeft} label={t('r.prevYear')} variant="secondary" className="size-10" disabled={!open?.hasEarlier} onClick={() => setYear(year - 1)} />
+        <p className="min-w-0 flex-1 text-center text-base font-bold text-fg">{t('r.year', { y: year })}</p>
+        <IconButton icon={ChevronRight} label={t('r.nextYear')} variant="secondary" className="size-10" disabled={year >= thisYear()} onClick={() => setYear(year + 1)} />
+        <IconButton icon={Download} label={t('exportCsv')} variant="secondary" className="size-10" onClick={exportCsv} disabled={loading} />
+      </div>
     </>
   )
 }

@@ -101,7 +101,7 @@ const en = {
   'mo.pending': 'Pending', 'mo.paidOf': '{a}/{b} paid',
   'mo.entries': 'Income & expenses',
   'mo.noUnits': 'No flats or shops added yet', 'mo.notDue': 'Not due',
-  'mo.floor': 'Floor {n}', 'mo.others': 'Others', 'mo.collectedShort': 'Collected',
+  'mo.floor': 'Floor {n}', 'mo.others': 'Others', 'mo.collectedShort': 'Collected', 'mo.viewMap': 'Building view', 'mo.viewList': 'List view',
   'a.forMonth': 'For which month', 'a.dateNote': 'Date (only for the record)', 'm.paidOnNote': 'Paid on (only for the record)',
   // maintenance
   'm.units': '{n} units',
@@ -128,7 +128,7 @@ const en = {
   'u.owner': 'Owner / resident name', 'u.phone': 'Phone',
   'u.bulkBtn': 'Add {n} units',
   // reports
-  'r.fy': 'FY {y}', 'r.in': 'In', 'r.out': 'Out', 'r.balance': 'Balance', 'r.broughtForward': 'Brought forward',
+  'r.year': 'Year {y}', 'r.in': 'In', 'r.out': 'Out', 'r.balance': 'Balance', 'r.broughtForward': 'Brought forward',
   'r.prevYear': 'Previous year', 'r.nextYear': 'Next year',
   'r.month': 'Month', 'r.total': 'Total',
   // users
@@ -224,7 +224,7 @@ const gu = {
   'mo.pending': 'બાકી', 'mo.paidOf': '{a}/{b} ભર્યા',
   'mo.entries': 'આવક અને ખર્ચ',
   'mo.noUnits': 'હજુ કોઈ ફ્લેટ કે દુકાન ઉમેરી નથી', 'mo.notDue': 'લાગુ નથી',
-  'mo.floor': 'માળ {n}', 'mo.others': 'અન્ય', 'mo.collectedShort': 'જમા',
+  'mo.floor': 'માળ {n}', 'mo.others': 'અન્ય', 'mo.collectedShort': 'જમા', 'mo.viewMap': 'બિલ્ડિંગ દેખાવ', 'mo.viewList': 'યાદી દેખાવ',
   'a.forMonth': 'કયા મહિનાનું', 'a.dateNote': 'તારીખ (ફક્ત નોંધ માટે)', 'm.paidOnNote': 'ભર્યાની તારીખ (ફક્ત નોંધ માટે)',
   'm.units': '{n} યુનિટ',
   'm.search': 'યુનિટ અથવા માલિક શોધો',
@@ -247,7 +247,7 @@ const gu = {
   'u.number': 'યુનિટ નંબર', 'u.numberPh': 'દા.ત. A-101', 'u.maint': 'સામાન્ય માસિક મેન્ટેનન્સ (₹)',
   'u.owner': 'માલિક / રહેવાસીનું નામ', 'u.phone': 'ફોન',
   'u.bulkBtn': '{n} યુનિટ ઉમેરો',
-  'r.fy': 'નાણાકીય વર્ષ {y}', 'r.in': 'આવક', 'r.out': 'ખર્ચ', 'r.balance': 'બેલેન્સ', 'r.broughtForward': 'આગળથી લાવેલ',
+  'r.year': 'વર્ષ {y}', 'r.in': 'આવક', 'r.out': 'ખર્ચ', 'r.balance': 'બેલેન્સ', 'r.broughtForward': 'આગળથી લાવેલ',
   'r.prevYear': 'પાછલું વર્ષ', 'r.nextYear': 'આગલું વર્ષ',
   'r.month': 'મહિનો', 'r.total': 'કુલ',
   'us.count': '{n} યુઝર્સ', 'us.add': 'યુઝર ઉમેરો', 'us.none': 'હજુ કોઈ યુઝર નથી', 'us.you': '(તમે)',

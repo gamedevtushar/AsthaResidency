@@ -38,8 +38,8 @@ Gujarati (default) and English. Switch with the **ગુ / EN** button (login pa
 All text lives in `src/i18n.jsx` – edit wording there or add another language.
 
 ## Screens
-1. **Accounts** (main screen) – wing tabs on top, total balance, then one month (last month first): every flat and shop floor by floor with paid date or pending, plus that month's other income and expenses
-2. **Reports** – yearly month‑by‑month summary + pending dues list, export CSV (includes actual dates)
+1. **Accounts** (main screen) – wing tabs on top, total balance, then one month (last month first): every flat and shop in a building view (top floor first, shops at the bottom) or as a list, paid or pending, plus that month's other income and expenses
+2. **Reports** – one calendar year on one screen: money in, money out and balance brought forward, month by month (year switcher at the bottom)
 3. **Wings & Units** (admins only) – add wings, flats and shops with monthly maintenance amount
 4. **Users** (Main Admin) – create users with username + password and assign roles
 
