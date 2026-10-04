@@ -122,9 +122,9 @@ export default function Reports() {
 
       {/* Wing and year scrollers, pinned just above the bottom menu */}
       <div className="sticky bottom-0 z-20 -mx-4 -mb-6 mt-auto flex shrink-0 items-center gap-1 border-t border-bar-line bg-bar px-2 py-1 sm:-mx-6 sm:px-4 lg:mx-0 lg:mb-0 lg:mt-4 lg:rounded-xl lg:border lg:px-2">
-        <SnapScroller items={wingOptions} value={wing} onChange={setWing} className="w-[48%] shrink-0" />
+        <SnapScroller items={wingOptions} value={wing} onChange={setWing} className="min-w-0 flex-1" />
         <span className="h-6 w-px shrink-0 bg-fg/15" />
-        <SnapScroller items={yearOptions} value={year} onChange={setYear} className="min-w-0 flex-1" itemClass="min-w-[4rem]" />
+        <SnapScroller items={yearOptions} value={year} onChange={setYear} className="min-w-0 flex-1" itemWidth="4rem" />
         {isAdmin && <IconButton icon={ImageDown} label={t('img.save')} variant="secondary" className="size-10" onClick={saveImage} disabled={loading || saving} />}
       </div>
     </>
