@@ -5,7 +5,7 @@ import { addDoc, collection, deleteDoc, doc, query, serverTimestamp, setDoc, upd
 import { sendPasswordResetEmail } from 'firebase/auth'
 import {
   ReceiptIndianRupee, ArrowUpCircle, ArrowDownCircle, Home, Store, Building2, UserPlus, Users, KeyRound, LogOut,
-  Languages, CheckCircle2, RotateCcw, Trash2, Check, Eye, EyeOff, Wand2, Copy, Share2, Crown, UserCog, Shield, Ban, Pencil, Layers, ChevronRight, X, Plus, SunMoon, ALargeSmall, Palette, LogIn, CalendarCog,
+  Languages, CheckCircle2, RotateCcw, Trash2, Check, Eye, EyeOff, Wand2, Copy, Share2, Crown, UserCog, Shield, Ban, Pencil, Layers, ChevronRight, X, Plus, SunMoon, ALargeSmall, Palette, Volume2, LogIn, CalendarCog,
   Download, Share, SquarePlus, Compass, EllipsisVertical, Smartphone,
 } from 'lucide-react'
 import { auth, db, createLogin, toLoginEmail, toLoginId, isRealEmail } from '../firebase'
@@ -18,6 +18,7 @@ import { periodOf } from '../lib/ledger'
 import { MODE_ICONS, categoryIcon } from '../lib/icons'
 import { t, tv, LangSwitch, useLang } from '../i18n'
 import { ThemeSwitch, TextSizeSwitch, PaletteGrid } from '../theme'
+import { useFeedback, setFeedback } from '../lib/feedback'
 import { useInstall, promptInstall, isIOS } from '../pwa'
 import LogoMark from './Logo'
 import { AmountInput, Button, Chips, DateField, Field, IconTile, Input, Modal, Segmented, Select, SkeletonTiles, Stepper, confirmDialog, cx, toast } from './ui'
@@ -88,6 +89,7 @@ function MoreSheet({ onClose }) {
   const { wingName } = useData()
   const { canPrompt, installed } = useInstall()
   const { lang } = useLang()
+  const sound = useFeedback()
   const navigate = useNavigate()
   const go = (to) => { onClose(); navigate(to) }
   const roleText = !isLoggedIn ? roleLabel('public')
@@ -136,6 +138,14 @@ function MoreSheet({ onClose }) {
           <IconTile icon={ALargeSmall} tone="gray" className="size-9" iconClass="size-[1.125rem]" />
           <span className="flex-1">{t('textSize')}</span>
           <TextSizeSwitch />
+        </div>
+        <div className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-base text-fg">
+          <IconTile icon={Volume2} tone="gray" className="size-9" iconClass="size-[1.125rem]" />
+          <span className="flex-1">{t('feedback')}</span>
+          <button type="button" role="switch" aria-checked={sound} aria-label={t('feedback')} onClick={() => setFeedback(!sound)}
+            className={cx('relative h-7 w-12 shrink-0 rounded-full transition-colors cursor-pointer', sound ? 'bg-accent' : 'bg-fg/20')}>
+            <span className={cx('absolute top-0.5 size-6 rounded-full bg-white shadow transition-all', sound ? 'left-[1.375rem]' : 'left-0.5')} />
+          </button>
         </div>
         <div className="rounded-2xl px-3 py-2.5">
           <div className="mb-2.5 flex items-center gap-3 text-base text-fg">

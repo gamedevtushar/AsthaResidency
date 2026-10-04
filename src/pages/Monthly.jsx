@@ -1,34 +1,35 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'motion/react'
 import { collection, query, where } from 'firebase/firestore'
-import { ImageDown, Plus, CalendarCog, Wallet, Layers, Building2, Rows3, ChevronsUpDown } from 'lucide-react'
+import { ImageDown, Plus, CalendarCog, Wallet, Layers, Building2, Rows3 } from 'lucide-react'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { useQuery } from '../hooks/useQuery'
 import { useEntries } from '../hooks/useEntries'
 import { useBalances } from '../hooks/useBalances'
-import { inr, inrShort, sum, shortDate, defaultPeriod } from '../lib/format'
+import { inr, inrShort, sum, shortDate, defaultPeriod, currentPeriod, shiftPeriod, periodLabel } from '../lib/format'
+import { useWingPick } from '../hooks/useWingPick'
+import SnapScroller from '../components/SnapScroller'
 import { monthImage } from '../lib/a4image'
 import { monthDues } from '../lib/ledger'
 import { categoryIcon } from '../lib/icons'
 import { t, tv } from '../i18n'
 import { AnimatedNumber, Badge, Button, EmptyState, IconButton, IconTile, ScrollCard, SkeletonList, Spinner, cx, toast } from '../components/ui'
-import { MonthPicker } from '../components/filters'
 import { forms } from '../components/forms'
 
 /**
- * The main screen, one wing and one month at a time.
- * Sticky on top: wing tabs, the balance and the month's four figures. The month switcher sits at the bottom.
+ * The main screen, one wing (or the common account) and one month at a time.
+ * Top bar: wing name and its balance. Sticky: the month's figures. Bottom: wing and month scrollers.
  * Accounts are usually settled a month later, so last month opens first.
  */
 export default function Monthly() {
-  const { profile, isAdmin, canEdit } = useAuth()
+  const { isAdmin, canEdit } = useAuth()
   const { units, wings, loading: unitsLoading } = useData()
   const [period, setPeriod] = useState(defaultPeriod())
-  const [picked, setWing] = useState(profile?.role === 'wing_admin' ? profile.wingId : '')
-  const wing = wings.some((w) => w.id === picked) ? picked : wings[0]?.id || ''
+  const { wing, setWing, options: wingOptions, isCommon, label: wingLabel } = useWingPick()
+  const monthOptions = useMemo(() => Array.from({ length: 36 }, (_, i) => shiftPeriod(currentPeriod(), i - 35)).map((p) => ({ value: p, label: periodLabel(p, true) })), [])
   const months = useMemo(() => [period], [period])
   const [view, setView] = useState('map') // building view first, list on request
   // Admins record a payment; everyone else just sees the details
@@ -38,17 +39,15 @@ export default function Monthly() {
   const { data: dues, loading: l1 } = useQuery(() => query(collection(db, 'dues'), where('period', '==', period)), [period])
   const { data: entries, loading: l2 } = useEntries(months)
 
-  const rows = useMemo(() => monthDues(units.filter((u) => u.wingId === wing), dues.filter((d) => d.wingId === wing), period), [units, dues, period, wing])
-  // The wing's own entries plus whole-building (common) ones
-  const list = useMemo(() => entries.filter((x) => !x.wingId || x.wingId === wing).sort((a, b) => (b.date || '').localeCompare(a.date || '')), [entries, wing])
+  const rows = useMemo(() => (isCommon ? [] : monthDues(units.filter((u) => u.wingId === wing), dues.filter((d) => d.wingId === wing), period)), [units, dues, period, wing, isCommon])
+  // This wing's own entries (the common account shows whole-building ones)
+  const list = useMemo(() => entries.filter((x) => (isCommon ? !x.wingId : x.wingId === wing)).sort((a, b) => (b.date || '').localeCompare(a.date || '')), [entries, wing, isCommon])
 
-  const total = sum(balances, 'balance')
-  const wingBalance = balances.find((b) => b.id === wing)?.balance ?? 0
+  const wingBalance = balances.find((b) => b.id === (isCommon ? '' : wing))?.balance ?? 0
   const paid = rows.filter((r) => r.status === 'paid')
   const due = rows.filter((r) => r.status === 'due')
   const income = sum(list.filter((x) => x.type === 'income'))
   const expense = sum(list.filter((x) => x.type === 'expense'))
-  const wingLabel = wings.find((w) => w.id === wing)?.name || ''
 
   // A4 picture of this month (white background, current language) to save or share
   const [saving, setSaving] = useState(false)
@@ -56,14 +55,14 @@ export default function Monthly() {
     setSaving(true)
     try {
       await monthImage({
-        wingName: wingLabel, period, entries: list, totalBalance: total,
+        wingName: wingLabel, period, entries: list, totalBalance: wingBalance,
         figures: { collected: sum(paid), pending: sum(due), income, expense },
         floors: building(rows).map((f) => ({ key: f.key, items: f.items.map((r) => ({ label: seatLabel(r), amount: r.amount, status: r.status })) })),
       })
     } catch (e) { toast.error(e) } finally { setSaving(false) }
   }
 
-  // Phone top bar: wing picker beside the name, total balance on the right
+  // Phone top bar: wing name beside the app name, its balance on the right
   const [slots, setSlots] = useState(null)
   useEffect(() => setSlots({ left: document.getElementById('topbar-left'), right: document.getElementById('topbar-right') }), [])
 
@@ -72,47 +71,33 @@ export default function Monthly() {
 
   return (
     <>
-      {slots?.left && createPortal(wings.length > 1
-        ? <WingWheel wings={wings} value={wing} onChange={setWing} />
-        : <span className="shrink-0 text-sm font-semibold whitespace-nowrap text-muted">– {wingLabel}</span>, slots.left)}
+      {slots?.left && createPortal(<span className="shrink-0 text-sm font-semibold whitespace-nowrap text-muted">– {wingLabel}</span>, slots.left)}
       {slots?.right && createPortal(
-        <div className="text-right leading-none">
-          <p className="text-[0.625rem] font-semibold text-muted">{t('dash.total')}</p>
-          <p className={cx('mt-0.5 text-[0.9375rem] font-bold whitespace-nowrap tabular-nums', total < 0 ? 'text-bad' : 'text-accent-ink')}>{lb ? '—' : <AnimatedNumber value={total} />}</p>
+        <div className="rounded-lg bg-accent/12 px-2.5 py-1 text-right leading-none">
+          <p className="text-[0.625rem] font-semibold text-muted">{t('r.balance')}</p>
+          <p className={cx('mt-0.5 text-base font-bold whitespace-nowrap tabular-nums', wingBalance < 0 ? 'text-bad' : 'text-accent-ink')}>{lb ? '—' : <AnimatedNumber value={wingBalance} />}</p>
         </div>, slots.right)}
 
-      {/* Sticky summary: the month in four figures (wing tabs and balance bar on wide screens) */}
+      {/* Sticky summary: the month's figures (and the balance bar on wide screens) */}
       <div className="sticky top-0 z-20 -mx-4 -mt-4 mb-3 shrink-0 space-y-2 bg-bg/95 px-4 pb-2 pt-2 backdrop-blur-md sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:mt-0 lg:bg-transparent lg:px-0 lg:pt-0 lg:backdrop-blur-none">
-        {wings.length > 1 && (
-          <div className="no-scrollbar hidden snap-x snap-mandatory gap-2 overflow-x-auto lg:flex">
-            {wings.map((w) => (
-              <button key={w.id} type="button" onClick={() => setWing(w.id)}
-                className={cx('h-9 shrink-0 snap-start rounded-lg px-4 text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer',
-                  wing === w.id ? 'bg-accent text-white shadow-sm' : 'border border-fg/10 bg-surface text-muted hover:text-fg')}>
-                {w.name}
-              </button>
-            ))}
-          </div>
-        )}
         <div className="hidden items-center gap-3 rounded-xl bg-[linear-gradient(90deg,var(--logo-1),var(--logo-2))] px-3.5 py-2 text-white shadow-sm lg:flex">
           <Wallet className="size-5 shrink-0 opacity-90" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-semibold opacity-85">{t('dash.total')}</p>
-            {wings.length > 1 && <p className="truncate text-[0.6875rem] opacity-75">{wingLabel}: {lb ? '—' : inr(wingBalance)}</p>}
+            <p className="truncate text-xs font-semibold opacity-85">{wingLabel} · {t('r.balance')}</p>
           </div>
-          <p className="shrink-0 text-xl font-bold whitespace-nowrap">{lb ? '—' : <AnimatedNumber value={total} />}</p>
+          <p className="shrink-0 text-xl font-bold whitespace-nowrap">{lb ? '—' : <AnimatedNumber value={wingBalance} />}</p>
         </div>
-        <div className="grid grid-cols-4 divide-x divide-fg/10 rounded-lg border border-fg/10 bg-surface py-1">
-          <Figure label={t('mo.collectedShort')} value={sum(paid)} tone="text-ok" />
-          <Figure label={t('mo.pending')} value={sum(due)} tone={due.length ? 'text-bad' : 'text-fg'} />
+        <div className={cx('grid divide-x divide-fg/10 rounded-lg border border-fg/10 bg-surface py-1', isCommon ? 'grid-cols-2' : 'grid-cols-4')}>
+          {!isCommon && <Figure label={t('mo.collectedShort')} value={sum(paid)} tone="text-ok" />}
+          {!isCommon && <Figure label={t('mo.pending')} value={sum(due)} tone={due.length ? 'text-bad' : 'text-fg'} />}
           <Figure label={t('income')} value={income} tone="text-ok" />
           <Figure label={t('expense')} value={expense} tone="text-bad" />
         </div>
       </div>
 
-      <div className="grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-5 lg:gap-4">
+      <div className={cx('mb-3 grid gap-3 lg:min-h-0 lg:flex-1 lg:gap-4', !isCommon && 'lg:grid-cols-5')}>
         {/* Maintenance: every flat and shop, floor by floor */}
-        <ScrollCard className="!min-h-0 lg:col-span-3" bodyClass="p-2.5 sm:p-3"
+        {!isCommon && <ScrollCard className="!min-h-0 lg:col-span-3" bodyClass="p-2.5 sm:p-3"
           header={(
             <div className="flex shrink-0 items-center gap-2 px-2.5 pt-2.5 sm:px-3 sm:pt-3">
               <div className="flex shrink-0 rounded-lg border border-fg/10 bg-fg/[0.04] p-0.5">
@@ -141,14 +126,14 @@ export default function Monthly() {
               ))}
             </div>
           )}
-        </ScrollCard>
+        </ScrollCard>}
 
         {/* Other income and expenses: this wing's and the whole building's */}
-        <ScrollCard className="lg:col-span-2"
+        <ScrollCard className={cx(!isCommon && 'lg:col-span-2')}
           header={(
             <div className="flex shrink-0 items-center gap-2 px-4 pb-1 pt-3">
               <h2 className="min-w-0 flex-1 truncate text-sm font-semibold text-muted">{t('mo.entries')}</h2>
-              {isAdmin && <Button size="sm" icon={Plus} onClick={() => forms.open('entry', { type: 'expense', period, wingId: wing })}>{t('add')}</Button>}
+              {isAdmin && <Button size="sm" icon={Plus} onClick={() => forms.open('entry', { type: 'expense', period, wingId: isCommon ? '' : wing })}>{t('add')}</Button>}
             </div>
           )}>
           {l2 ? <SkeletonList /> : !list.length ? (
@@ -179,39 +164,14 @@ export default function Monthly() {
         </ScrollCard>
       </div>
 
-      {/* Month switcher, pinned just above the bottom menu */}
-      <div className="sticky bottom-0 z-20 -mx-4 -mb-6 mt-3 flex shrink-0 items-center gap-2 border-t border-bar-line bg-bar px-4 py-2 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:mb-0 lg:mt-4 lg:rounded-xl lg:border lg:px-2">
-        <MonthPicker value={period} onChange={setPeriod} className="h-10 min-w-0 flex-1" />
+      {/* Wing and month scrollers, pinned just above the bottom menu */}
+      <div className="sticky bottom-0 z-20 -mx-4 -mb-6 mt-auto flex shrink-0 items-center gap-1 border-t border-bar-line bg-bar px-2 py-1 sm:-mx-6 sm:px-4 lg:static lg:mx-0 lg:mb-0 lg:mt-4 lg:rounded-xl lg:border lg:px-2">
+        <SnapScroller items={wingOptions} value={wing} onChange={setWing} className="w-[42%] shrink-0" />
+        <span className="h-6 w-px shrink-0 bg-fg/15" />
+        <SnapScroller items={monthOptions} value={period} onChange={setPeriod} className="min-w-0 flex-1" />
         {isAdmin && <IconButton icon={ImageDown} label={t('img.save')} variant="secondary" className="size-10" onClick={saveImage} disabled={saving || l1 || l2} />}
       </div>
     </>
-  )
-}
-
-/** Wing picker for the top bar: swipe up / down (snaps to one wing) or tap for the next wing */
-function WingWheel({ wings, value, onChange }) {
-  const ref = useRef(null)
-  const timer = useRef(0)
-  const index = Math.max(0, wings.findIndex((w) => w.id === value))
-  useEffect(() => { const el = ref.current; if (el) el.scrollTo({ top: index * el.clientHeight, behavior: 'smooth' }) }, [index])
-  const onScroll = () => {
-    clearTimeout(timer.current)
-    timer.current = setTimeout(() => {
-      const el = ref.current
-      const i = Math.round(el.scrollTop / el.clientHeight)
-      if (wings[i] && wings[i].id !== value) onChange(wings[i].id)
-    }, 120)
-  }
-  return (
-    <div className="flex shrink-0 items-center rounded-lg bg-accent/15 pl-2 pr-1 text-accent-ink">
-      <div ref={ref} onScroll={onScroll} className="no-scrollbar h-7 snap-y snap-mandatory overflow-y-auto">
-        {wings.map((w, i) => (
-          <button key={w.id} type="button" onClick={() => onChange(wings[(i + 1) % wings.length].id)}
-            className="flex h-7 snap-center items-center text-sm font-bold whitespace-nowrap cursor-pointer">{w.name}</button>
-        ))}
-      </div>
-      <ChevronsUpDown className="ml-0.5 size-3.5 shrink-0 opacity-70" />
-    </div>
   )
 }
 

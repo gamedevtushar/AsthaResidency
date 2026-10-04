@@ -1,5 +1,6 @@
 import { registerServiceWorker } from './pwa' // first: catches the browser's install event early
 import { applyTheme } from './theme'
+import { installTapFeedback } from './lib/feedback'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
@@ -10,6 +11,7 @@ import './index.css'
 
 registerServiceWorker()
 applyTheme()
+installTapFeedback()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

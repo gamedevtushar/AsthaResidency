@@ -112,7 +112,7 @@ export async function monthImage({ wingName, period, floors, entries, figures, t
   header(ctx, `${t('nav.month')} · ${wingName}`, periodLabel(period))
 
   cards(ctx, 400, [
-    { label: t('dash.total'), value: inr(totalBalance), fill: totalBalance < 0 ? C.bad : C.accent },
+    { label: `${wingName} · ${t('r.balance')}`, value: inr(totalBalance), fill: totalBalance < 0 ? C.bad : C.accent },
     { label: t('mo.collectedShort'), value: inr(figures.collected), color: C.ok },
     { label: t('mo.pending'), value: inr(figures.pending), color: figures.pending ? C.bad : C.ink },
   ])
@@ -186,9 +186,9 @@ export async function monthImage({ wingName, period, floors, entries, figures, t
 }
 
 /** One calendar year: bar chart of money in and out with the balance line, then the table */
-export async function yearImage({ year, opening, rows, totIn, totOut }) {
+export async function yearImage({ wingName, year, opening, rows, totIn, totOut }) {
   const { canvas, ctx } = await page()
-  header(ctx, t('nav.reports'), t('r.year', { y: year }))
+  header(ctx, `${t('nav.reports')} · ${wingName}`, t('r.year', { y: year }))
   const closing = rows.filter((r) => !r.future).at(-1)?.balance ?? opening
   cards(ctx, 400, [
     { label: t('r.broughtForward'), value: inr(opening), color: C.ink },
@@ -248,5 +248,5 @@ export async function yearImage({ year, opening, rows, totIn, totOut }) {
   line(t('r.total'), inr(totIn), inr(totOut), inr(closing), true, '#f5f5f4')
 
   footer(ctx)
-  await save(canvas, `${t('appName')} - ${year}.png`)
+  await save(canvas, `${t('appName')} - ${wingName} - ${year}.png`)
 }

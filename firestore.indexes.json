@@ -45,6 +45,10 @@
           "order": "ASCENDING"
         },
         {
+          "fieldPath": "wingId",
+          "order": "ASCENDING"
+        },
+        {
           "fieldPath": "period",
           "order": "ASCENDING"
         },
@@ -60,6 +64,10 @@
       "fields": [
         {
           "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "wingId",
           "order": "ASCENDING"
         },
         {

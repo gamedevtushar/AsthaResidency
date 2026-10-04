@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { collection, getAggregateFromServer, query, sum as total, where } from 'firebase/firestore'
-import { ChevronLeft, ChevronRight, ImageDown } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { ImageDown } from 'lucide-react'
 import { db } from '../firebase'
 import { useQuery } from '../hooks/useQuery'
+import { useWingPick } from '../hooks/useWingPick'
+import SnapScroller from '../components/SnapScroller'
 import { useAuth } from '../context/AuthContext'
 import { useEntries } from '../hooks/useEntries'
 import { inr, sum, periodLabel, currentPeriod } from '../lib/format'
@@ -17,45 +20,50 @@ const thisYear = () => new Date().getFullYear()
 const yearPeriods = (y) => Array.from({ length: 12 }, (_, i) => `${y}-${String(i + 1).padStart(2, '0')}`)
 
 /** Money brought forward into a year: everything before its first month */
-const before = (name, field, value, start) =>
-  getAggregateFromServer(query(collection(db, name), where(field, '==', value), where('period', '<', start)), { v: total('amount') })
+const before = (name, field, value, wingId, start) =>
+  getAggregateFromServer(query(collection(db, name), where(field, '==', value), where('wingId', '==', wingId), where('period', '<', start)), { v: total('amount') })
     .then((s) => Number(s.data().v) || 0)
 
-function useOpening(start) {
+/** Balance brought forward for one wing ('' = common account) */
+function useOpening(wingId, start) {
   const [state, set] = useState(null)
   useEffect(() => {
     let live = true
     set(null)
-    Promise.all([before('dues', 'status', 'paid', start), before('transactions', 'type', 'income', start), before('transactions', 'type', 'expense', start)])
-      .then(([m, i, e]) => live && set({ opening: m + i - e, hasEarlier: m + i + e > 0 }))
-      .catch((e) => { console.error(e); if (live) set({ opening: 0, hasEarlier: false }) })
+    Promise.all([wingId ? before('dues', 'status', 'paid', wingId, start) : 0, before('transactions', 'type', 'income', wingId, start), before('transactions', 'type', 'expense', wingId, start)])
+      .then(([m, i, e]) => live && set({ opening: m + i - e }))
+      .catch((e) => { console.error(e); if (live) set({ opening: 0 }) })
     return () => { live = false }
-  }, [start])
+  }, [wingId, start])
   return state
 }
 
-/** One year on one screen: money in, money out and the balance carried forward, month by month */
+/** One wing, one year on one screen: money in, money out and the balance carried forward, month by month */
 export default function Reports() {
   const { isAdmin } = useAuth()
+  const { wing, setWing, options: wingOptions, isCommon, label: wingLabel } = useWingPick()
+  const wingId = isCommon ? '' : wing
   const [year, setYear] = useState(thisYear())
+  const yearOptions = useMemo(() => Array.from({ length: 6 }, (_, i) => thisYear() - 5 + i).map((y) => ({ value: y, label: String(y) })), [])
   const periods = useMemo(() => yearPeriods(year), [year])
   const now = currentPeriod()
 
   const { data: dues, loading: l1 } = useQuery(() => query(collection(db, 'dues'), where('period', 'in', periods)), [year])
   const { data: txns, loading: l2 } = useEntries(periods)
-  const open = useOpening(periods[0])
+  const open = useOpening(wingId, periods[0])
   const loading = l1 || l2 || !open
 
   // Everything counts in the month it is FOR, whenever it was actually paid
   const rows = useMemo(() => {
     let balance = open?.opening || 0
     return periods.map((p) => {
-      const inn = sum(dues.filter((d) => d.period === p && d.status === 'paid')) + sum(txns.filter((x) => periodOf(x) === p && x.type === 'income'))
-      const out = sum(txns.filter((x) => periodOf(x) === p && x.type === 'expense'))
+      const mine = (x) => periodOf(x) === p && (x.wingId || '') === wingId
+      const inn = sum(dues.filter((d) => d.period === p && d.status === 'paid' && d.wingId === wingId)) + sum(txns.filter((x) => mine(x) && x.type === 'income'))
+      const out = sum(txns.filter((x) => mine(x) && x.type === 'expense'))
       balance += inn - out
       return { p, inn, out, balance, future: p > now && !inn && !out }
     })
-  }, [dues, txns, periods, open, now])
+  }, [dues, txns, periods, open, now, wingId])
   const totIn = sum(rows, 'inn')
   const totOut = sum(rows, 'out')
 
@@ -63,12 +71,15 @@ export default function Reports() {
   const [saving, setSaving] = useState(false)
   const saveImage = async () => {
     setSaving(true)
-    try { await yearImage({ year, opening: open.opening, rows, totIn, totOut }) } catch (e) { toast.error(e) } finally { setSaving(false) }
+    try { await yearImage({ wingName: wingLabel, year, opening: open.opening, rows, totIn, totOut }) } catch (e) { toast.error(e) } finally { setSaving(false) }
   }
 
   const cell = 'px-2 py-1.5 text-right tabular-nums whitespace-nowrap'
+  const [slot, setSlot] = useState(null)
+  useEffect(() => setSlot(document.getElementById('topbar-left')), [])
   return (
     <>
+      {slot && createPortal(<span className="shrink-0 text-sm font-semibold whitespace-nowrap text-muted">– {wingLabel}</span>, slot)}
       <Card className="mb-3 shrink-0 overflow-hidden">
         {loading ? <SkeletonList rows={8} /> : (
           <motion.table key={year} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full table-fixed text-[0.8125rem]">
@@ -109,11 +120,11 @@ export default function Reports() {
         )}
       </Card>
 
-      {/* Year switcher, pinned just above the bottom menu */}
-      <div className="sticky bottom-0 z-20 -mx-4 -mb-6 mt-auto flex shrink-0 items-center gap-2 border-t border-bar-line bg-bar px-4 py-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:mb-0 lg:mt-4 lg:rounded-xl lg:border lg:px-2">
-        <IconButton icon={ChevronLeft} label={t('r.prevYear')} variant="secondary" className="size-10" disabled={!open?.hasEarlier} onClick={() => setYear(year - 1)} />
-        <p className="min-w-0 flex-1 text-center text-base font-bold text-fg">{t('r.year', { y: year })}</p>
-        <IconButton icon={ChevronRight} label={t('r.nextYear')} variant="secondary" className="size-10" disabled={year >= thisYear()} onClick={() => setYear(year + 1)} />
+      {/* Wing and year scrollers, pinned just above the bottom menu */}
+      <div className="sticky bottom-0 z-20 -mx-4 -mb-6 mt-auto flex shrink-0 items-center gap-1 border-t border-bar-line bg-bar px-2 py-1 sm:-mx-6 sm:px-4 lg:mx-0 lg:mb-0 lg:mt-4 lg:rounded-xl lg:border lg:px-2">
+        <SnapScroller items={wingOptions} value={wing} onChange={setWing} className="w-[48%] shrink-0" />
+        <span className="h-6 w-px shrink-0 bg-fg/15" />
+        <SnapScroller items={yearOptions} value={year} onChange={setYear} className="min-w-0 flex-1" itemClass="min-w-[4rem]" />
         {isAdmin && <IconButton icon={ImageDown} label={t('img.save')} variant="secondary" className="size-10" onClick={saveImage} disabled={loading || saving} />}
       </div>
     </>

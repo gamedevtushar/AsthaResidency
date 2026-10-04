@@ -65,7 +65,7 @@ const en = {
   'pwa.iconNote': 'Added it before and still see the old logo? Remove the old icon from your home screen and add it again.',
   'setup.title': 'App not connected yet', 'setup.text': 'The Firebase settings are missing. Add the FIREBASE_CONFIG secret on GitHub and deploy again (see README).',
   'role.public': 'Visitor · view only', 'public.viewing': 'You are viewing only', 'public.login': 'Admin login',
-  menu: 'Menu', theme: 'Theme', textSize: 'Text size', palette: 'Colour theme', add: 'Add', 'login.back': 'View without login',
+  menu: 'Menu', theme: 'Theme', textSize: 'Text size', palette: 'Colour theme', feedback: 'Sound & vibration', add: 'Add', 'login.back': 'View without login',
   'u.tapToRemove': 'Tap a unit to remove it (tap again to bring it back). Add extra numbers below.',
   'u.addExtraPh': 'Extra unit, e.g. A-105', 'u.maintUsualHint': 'Usual amount. You can change it any month with "Monthly amount" in Monthly accounts.',
   'u.phoneHint': 'Only visible to logged-in admins',
@@ -95,7 +95,6 @@ const en = {
   'pw.min': 'New password must be at least 6 characters', 'pw.mismatch': 'New passwords do not match',
   'pw.done': 'Password changed', 'pw.wrong': 'Current password is wrong',
   // dashboard
-  'dash.total': 'Total balance',
   'dash.collected': 'Maintenance collected',
   // monthly accounts
   'mo.pending': 'Pending',
@@ -130,7 +129,6 @@ const en = {
   'u.bulkBtn': 'Add {n} units',
   // reports
   'r.year': 'Year {y}', 'r.in': 'In', 'r.out': 'Out', 'r.balance': 'Balance', 'r.broughtForward': 'Brought forward',
-  'r.prevYear': 'Previous year', 'r.nextYear': 'Next year',
   'r.month': 'Month', 'r.total': 'Total',
   // users
   'us.count': '{n} users', 'us.add': 'Add user', 'us.none': 'No users yet', 'us.you': '(you)',
@@ -196,7 +194,7 @@ const gu = {
   'pwa.iconNote': 'પહેલાં ઉમેરેલું હોય અને જૂનો લોગો દેખાય? હોમ સ્ક્રીન પરથી જૂનો આઇકન કાઢી ફરી ઉમેરો.',
   'setup.title': 'એપ હજુ જોડાયેલી નથી', 'setup.text': 'Firebase સેટિંગ્સ નથી. GitHub માં FIREBASE_CONFIG secret ઉમેરી ફરી deploy કરો (README જુઓ).',
   'role.public': 'મુલાકાતી · ફક્ત જોવા', 'public.viewing': 'તમે ફક્ત જોઈ રહ્યા છો', 'public.login': 'એડમિન લૉગિન',
-  menu: 'મેનુ', theme: 'થીમ', textSize: 'અક્ષરનું કદ', palette: 'રંગ થીમ', add: 'ઉમેરો', 'login.back': 'લૉગિન વગર જુઓ',
+  menu: 'મેનુ', theme: 'થીમ', textSize: 'અક્ષરનું કદ', palette: 'રંગ થીમ', feedback: 'અવાજ અને વાઇબ્રેશન', add: 'ઉમેરો', 'login.back': 'લૉગિન વગર જુઓ',
   'u.tapToRemove': 'યુનિટ દૂર કરવા તેના પર ટૅપ કરો (ફરી ટૅપ કરવાથી પાછું આવશે). વધારાના નંબર નીચે ઉમેરો.',
   'u.addExtraPh': 'વધારાનું યુનિટ, દા.ત. A-105', 'u.maintUsualHint': 'સામાન્ય રકમ. "માસિક હિસાબ" માં "મહિનાની રકમ" થી કોઈ પણ મહિને બદલી શકાય.',
   'u.phoneHint': 'ફક્ત લૉગિન થયેલા એડમિન જ જોઈ શકે',
@@ -220,7 +218,6 @@ const gu = {
   'pw.current': 'હાલનો પાસવર્ડ', 'pw.new': 'નવો પાસવર્ડ', 'pw.confirm': 'નવો પાસવર્ડ ફરીથી', 'pw.change': 'બદલો',
   'pw.min': 'નવો પાસવર્ડ ઓછામાં ઓછા 6 અક્ષરનો હોવો જોઈએ', 'pw.mismatch': 'નવા પાસવર્ડ મેળ ખાતા નથી',
   'pw.done': 'પાસવર્ડ બદલાઈ ગયો', 'pw.wrong': 'હાલનો પાસવર્ડ ખોટો છે',
-  'dash.total': 'કુલ બેલેન્સ',
   'dash.collected': 'મેન્ટેનન્સ જમા',
   'mo.pending': 'બાકી',
   'mo.entries': 'આવક અને ખર્ચ',
@@ -250,7 +247,6 @@ const gu = {
   'u.owner': 'માલિક / રહેવાસીનું નામ', 'u.phone': 'ફોન',
   'u.bulkBtn': '{n} યુનિટ ઉમેરો',
   'r.year': 'વર્ષ {y}', 'r.in': 'આવક', 'r.out': 'ખર્ચ', 'r.balance': 'બેલેન્સ', 'r.broughtForward': 'આગળથી લાવેલ',
-  'r.prevYear': 'પાછલું વર્ષ', 'r.nextYear': 'આગલું વર્ષ',
   'r.month': 'મહિનો', 'r.total': 'કુલ',
   'us.count': '{n} યુઝર્સ', 'us.add': 'યુઝર ઉમેરો', 'us.none': 'હજુ કોઈ યુઝર નથી', 'us.you': '(તમે)',
   'us.remove': 'દૂર કરો',
