@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import { addDoc, collection, deleteDoc, doc, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, getCountFromServer, getDoc, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
 import { sendPasswordResetEmail } from 'firebase/auth'
 import {
   ReceiptIndianRupee, ArrowUpCircle, ArrowDownCircle, Home, Store, Building2, UserPlus, Users, KeyRound, LogOut,
-  Languages, CheckCircle2, RotateCcw, Trash2, Check, Eye, EyeOff, Wand2, Copy, Share2, Crown, UserCog, Shield, Ban, Pencil, Layers, ChevronRight, X, Plus, SunMoon, ALargeSmall, Palette, Volume2, LogIn, CalendarCog,
+  Languages, CheckCircle2, RotateCcw, Trash2, Check, Eye, EyeOff, Wand2, Copy, Share2, Crown, UserCog, Shield, Ban, Pencil, Layers, ChevronRight, X, Plus, SunMoon, ALargeSmall, Palette, Vibrate, BellRing, BellOff, Send, LogIn, CalendarCog,
   Download, Share, SquarePlus, Compass, EllipsisVertical, Smartphone,
 } from 'lucide-react'
 import { auth, db, createLogin, toLoginEmail, toLoginId, isRealEmail } from '../firebase'
@@ -19,6 +19,8 @@ import { MODE_ICONS, categoryIcon } from '../lib/icons'
 import { t, tv, LangSwitch, useLang } from '../i18n'
 import { ThemeSwitch, TextSizeSwitch, PaletteGrid } from '../theme'
 import { useFeedback, setFeedback } from '../lib/feedback'
+import { useReminderState, enableReminders, previewNotification } from '../lib/push'
+import { DEFAULT_REMINDERS } from '../reminders'
 import { useInstall, promptInstall, isIOS } from '../pwa'
 import LogoMark from './Logo'
 import { AmountInput, Button, Chips, DateField, Field, IconTile, Input, Modal, Segmented, Select, SkeletonTiles, Stepper, confirmDialog, cx, toast } from './ui'
@@ -90,6 +92,7 @@ function MoreSheet({ onClose }) {
   const { canPrompt, installed } = useInstall()
   const { lang } = useLang()
   const sound = useFeedback()
+  const reminders = useReminderState()
   const navigate = useNavigate()
   const go = (to) => { onClose(); navigate(to) }
   const roleText = !isLoggedIn ? roleLabel('public')
@@ -122,6 +125,7 @@ function MoreSheet({ onClose }) {
         {isAdmin && <>
           <Row icon={Building2} label={t('nav.units')} onClick={() => go('/units')} />
           {isSuper && <Row icon={Users} label={t('nav.users')} onClick={() => go('/users')} />}
+          {isSuper && <Row icon={BellRing} label={t('rem.settings')} onClick={() => forms.open('reminders')} />}
           <div className="my-2 h-px bg-fg/10" />
         </>}
         <div className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-base text-fg">
@@ -139,8 +143,18 @@ function MoreSheet({ onClose }) {
           <span className="flex-1">{t('textSize')}</span>
           <TextSizeSwitch />
         </div>
+        {reminders !== 'unsupported' && (
+          <div className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-base text-fg">
+            <IconTile icon={reminders === 'granted' ? BellRing : BellOff} tone={reminders === 'granted' ? 'green' : 'gray'} className="size-9" iconClass="size-[1.125rem]" />
+            <span className="min-w-0 flex-1">
+              <span className="block">{t('rem.title')}</span>
+              <span className="block text-xs text-muted">{t(`rem.state.${reminders}`)}</span>
+            </span>
+            {reminders === 'default' && <Button size="sm" onClick={async () => { if (await enableReminders()) toast.success(t('rem.on')) }}>{t('rem.turnOn')}</Button>}
+          </div>
+        )}
         <div className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-base text-fg">
-          <IconTile icon={Volume2} tone="gray" className="size-9" iconClass="size-[1.125rem]" />
+          <IconTile icon={Vibrate} tone="gray" className="size-9" iconClass="size-[1.125rem]" />
           <span className="flex-1">{t('feedback')}</span>
           <button type="button" role="switch" aria-checked={sound} aria-label={t('feedback')} onClick={() => setFeedback(!sound)}
             className={cx('relative h-7 w-12 shrink-0 rounded-full transition-colors cursor-pointer', sound ? 'bg-accent' : 'bg-fg/20')}>
@@ -953,6 +967,85 @@ function InstallSheet({ onClose }) {
   )
 }
 
+/* ================= Maintenance reminders (Main Admin) ================= */
+const HOURS = Array.from({ length: 17 }, (_, i) => `${String(i + 6).padStart(2, '0')}:00`) // 06:00 … 22:00
+const hourLabel = (hh) => { const h = Number(hh.slice(0, 2)); return `${((h + 11) % 12) + 1}:00 ${h < 12 ? 'AM' : 'PM'}` }
+
+function RemindersForm({ onClose }) {
+  const [f, setF] = useState(null)
+  const [phones, setPhones] = useState(null)
+  const [busy, setBusy] = useState(false)
+  useEffect(() => {
+    getDoc(doc(db, 'settings', 'reminders')).then((d) => setF({ ...DEFAULT_REMINDERS, ...(d.exists() ? d.data() : {}) })).catch(() => setF(DEFAULT_REMINDERS))
+    getCountFromServer(collection(db, 'pushSubs')).then((c) => setPhones(c.data().count)).catch(() => setPhones(null))
+  }, [])
+  const setMsg = (i, k, v) => setF({ ...f, messages: f.messages.map((m, j) => (j === i ? { ...m, [k]: v } : m)) })
+  const toggleDay = (d) => setF({ ...f, days: f.days.includes(d) ? f.days.filter((x) => x !== d) : [...f.days, d].sort((a, b) => a - b) })
+
+  const save = async (e) => {
+    e.preventDefault()
+    const messages = f.messages.filter((m) => m.body.trim()).map((m) => ({ time: m.time, title: m.title.trim(), body: m.body.trim() }))
+      .sort((a, b) => a.time.localeCompare(b.time))
+    setBusy(true)
+    try {
+      await setDoc(doc(db, 'settings', 'reminders'), { enabled: f.enabled, days: f.days, messages, updatedAt: serverTimestamp() }, { merge: true })
+      toast.success(t('saved'), { title: t('rem.settings') })
+      onClose()
+    } catch (err) { toast.error(err); setBusy(false) }
+  }
+  const preview = async (m) => {
+    if (!(await previewNotification(m))) toast.info(m.body, { title: m.title })
+  }
+
+  return (
+    <Modal onClose={onClose} size="lg" icon={BellRing} title={t('rem.settings')} subtitle={t('rem.sub')}
+      footer={<Submit form="rem-form" loading={busy} >{t('save')}</Submit>}>
+      {!f ? <SkeletonTiles count={6} /> : (
+        <form id="rem-form" onSubmit={save} noValidate className="space-y-5">
+          <p className="rounded-xl bg-info/10 px-3.5 py-3 text-sm leading-relaxed text-info">
+            {t('rem.note')}{phones !== null && <><br /><b>{t('rem.phones', { n: phones })}</b></>}
+          </p>
+          <label className="flex items-center gap-3 rounded-xl border border-fg/10 px-3.5 py-3 text-base text-fg cursor-pointer">
+            <span className="flex-1 font-semibold">{t('rem.enabled')}</span>
+            <button type="button" role="switch" aria-checked={f.enabled} onClick={() => setF({ ...f, enabled: !f.enabled })}
+              className={cx('relative h-7 w-12 shrink-0 rounded-full transition-colors cursor-pointer', f.enabled ? 'bg-accent' : 'bg-fg/20')}>
+              <span className={cx('absolute top-0.5 size-6 rounded-full bg-white shadow transition-all', f.enabled ? 'left-[1.375rem]' : 'left-0.5')} />
+            </button>
+          </label>
+          <Field label={t('rem.days')}>
+            <div className="grid grid-cols-7 gap-1.5">
+              {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
+                <button key={d} type="button" onClick={() => toggleDay(d)} aria-pressed={f.days.includes(d)}
+                  className={cx('h-9 rounded-lg text-sm font-semibold tabular-nums transition-colors cursor-pointer', f.days.includes(d) ? 'bg-accent text-white' : 'bg-fg/[0.05] text-muted hover:bg-fg/10')}>{d}</button>
+              ))}
+            </div>
+          </Field>
+          <div className="space-y-3">
+            <p className="text-[0.875rem] font-semibold text-muted">{t('rem.messages')}</p>
+            {f.messages.map((m, i) => (
+              <div key={i} className="space-y-2.5 rounded-xl border border-fg/10 p-3">
+                <div className="flex items-center gap-2">
+                  <Select size="sm" value={m.time} onChange={(v) => setMsg(i, 'time', v)} options={HOURS.map((h) => ({ value: h, label: hourLabel(h) }))} className="w-36" />
+                  <div className="flex-1" />
+                  <Button size="sm" variant="secondary" icon={Send} onClick={() => preview(m)}>{t('rem.preview')}</Button>
+                  {f.messages.length > 1 && <Button size="sm" variant="dangerSoft" aria-label={t('delete')} onClick={() => setF({ ...f, messages: f.messages.filter((_, j) => j !== i) })}><Trash2 className="size-4" /></Button>}
+                </div>
+                <Input value={m.title} onChange={(e) => setMsg(i, 'title', e.target.value)} placeholder={t('rem.titlePh')} />
+                <textarea value={m.body} onChange={(e) => setMsg(i, 'body', e.target.value)} rows={3} placeholder={t('rem.bodyPh')}
+                  className="w-full rounded-xl border border-fg/12 bg-fg/[0.03] px-3.5 py-3 text-base text-fg outline-none transition placeholder:text-subtle focus:border-accent focus:bg-surface focus:ring-4 focus:ring-accent/15" />
+              </div>
+            ))}
+            {f.messages.length < 4 && (
+              <Button variant="secondary" icon={Plus} className="w-full"
+                onClick={() => setF({ ...f, messages: [...f.messages, { time: '12:00', title: f.messages[0]?.title || '', body: '' }] })}>{t('rem.addTime')}</Button>
+            )}
+          </div>
+        </form>
+      )}
+    </Modal>
+  )
+}
+
 /* ================= Colour themes (desktop sidebar) ================= */
 function PaletteSheet({ onClose }) {
   const { lang } = useLang()
@@ -964,7 +1057,7 @@ function PaletteSheet({ onClose }) {
 }
 
 const REGISTRY = {
-  bills: BillsForm, palette: PaletteSheet,
+  bills: BillsForm, palette: PaletteSheet, reminders: RemindersForm,
   install: InstallSheet,
   quickAdd: QuickAddSheet, more: MoreSheet, collect: CollectSheet, payment: PaymentForm, entry: EntryForm,
   unit: UnitForm, wing: WingWizard, wingEdit: WingEditForm, user: UserForm, password: ChangePasswordForm,

@@ -9,7 +9,7 @@ import { useWingPick } from '../hooks/useWingPick'
 import SnapScroller from '../components/SnapScroller'
 import { useAuth } from '../context/AuthContext'
 import { useEntries } from '../hooks/useEntries'
-import { inr, sum, periodLabel, currentPeriod } from '../lib/format'
+import { inr, sum, monthName, currentPeriod } from '../lib/format'
 import { yearImage } from '../lib/a4image'
 import { periodOf } from '../lib/ledger'
 import { Card, IconButton, SkeletonList, cx, toast } from '../components/ui'
@@ -99,7 +99,7 @@ export default function Reports() {
               </tr>
               {rows.map((r) => (
                 <tr key={r.p} className={cx(r.p === now && 'bg-fg/[0.03]')}>
-                  <td className="px-2 py-1.5 text-left font-medium whitespace-nowrap text-fg">{periodLabel(r.p, true)}</td>
+                  <td className="px-2 py-1.5 text-left font-medium whitespace-nowrap text-fg">{monthName(r.p)}</td>
                   {r.future ? <td colSpan={3} className="px-2 py-1.5 text-center text-subtle">—</td> : <>
                     <td className={cx(cell, r.inn ? 'text-ok' : 'text-subtle')}>{inr(r.inn)}</td>
                     <td className={cx(cell, r.out ? 'text-bad' : 'text-subtle')}>{inr(r.out)}</td>

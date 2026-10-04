@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { NavLink, Link, useLocation, useOutlet, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { Wallet, Palette, Building2, BarChart3, Users, LogOut, KeyRound, Plus, Menu as MenuIcon, LogIn, Eye, Download } from 'lucide-react'
@@ -5,7 +6,8 @@ import { useAuth, roleLabel } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { t, LangSwitch } from '../i18n'
 import { ThemeSwitch, TextSizeSwitch } from '../theme'
-import { pageVariants, confirmDialog, cx, Button } from './ui'
+import { pageVariants, confirmDialog, cx, Button, toast } from './ui'
+import { reminderState, enableReminders, refreshReminders } from '../lib/push'
 import { forms, startInstall } from './forms'
 import { useInstall } from '../pwa'
 import LogoMark from './Logo'
@@ -48,6 +50,19 @@ export default function Layout() {
     : profile.role === 'wing_admin' ? `${roleLabel('wing_admin')} · ${wingName(profile.wingId)}` : roleLabel(profile.role)
   // Wings & Units is only for admins
   const nav = [...NAV, isAdmin && { to: '/units', key: 'units', icon: Building2 }, isSuper && { to: '/users', key: 'users', icon: Users }].filter(Boolean)
+
+  // Installed app: keep the reminder subscription fresh, and offer reminders once
+  useEffect(() => {
+    refreshReminders()
+    let asked = true
+    try { asked = !!localStorage.getItem('remAsked') } catch { /* storage unavailable */ }
+    if (asked || reminderState() !== 'default') return
+    const id = setTimeout(() => {
+      try { localStorage.setItem('remAsked', '1') } catch { /* storage unavailable */ }
+      toast.info(t('rem.ask'), { title: t('rem.title'), duration: 20000, action: { label: t('rem.turnOn'), onClick: () => enableReminders().then((ok) => ok && toast.success(t('rem.on'))) } })
+    }, 2500)
+    return () => clearTimeout(id)
+  }, [])
 
   const logout = async () => {
     if (await confirmDialog({ title: t('signOut'), message: t('confirm.signOut'), confirmText: t('signOut'), tone: 'primary' })) signOut()

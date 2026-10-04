@@ -63,6 +63,25 @@ service cloud.firestore {
       allow delete: if canDeleteWingData();
     }
 
+    // ---- Reminder settings: everyone can read (the app shows them), only Main Admin changes them ----
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if isSuper();
+    }
+
+    // ---- Push addresses of phones that turned on reminders. Phones can only save their own, in this exact shape;
+    //      nobody but Main Admin can read or remove them (the sender on GitHub uses admin access). ----
+    match /pushSubs/{id} {
+      allow create, update: if request.resource.data.keys().hasOnly(['endpoint', 'keys', 'createdAt'])
+        && request.resource.data.endpoint is string && request.resource.data.endpoint.matches('https://.+')
+        && request.resource.data.endpoint.size() < 1000
+        && request.resource.data.keys.keys().hasOnly(['p256dh', 'auth'])
+        && request.resource.data.keys.p256dh is string && request.resource.data.keys.p256dh.size() < 200
+        && request.resource.data.keys.auth is string && request.resource.data.keys.auth.size() < 100
+        && id.size() == 64;
+      allow read, delete: if isSuper();
+    }
+
     // ---- Private: residents' phone numbers, only for logged-in users ----
     match /unitContacts/{unitId} {
       allow read: if isApproved();

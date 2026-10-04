@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase'
 import { byNumber } from '../lib/format'
-import { t } from '../i18n'
+import { t, wingTitle } from '../i18n'
 import { useAuth } from './AuthContext'
 
 const DataContext = createContext(null)
@@ -35,12 +35,13 @@ export function DataProvider({ children }) {
   }, [canSeeContacts])
 
   const value = useMemo(() => {
-    const wingMap = Object.fromEntries((wings || []).map((w) => [w.id, w]))
+    const list = (wings || []).map((w) => ({ ...w, label: wingTitle(w.name) }))
+    const wingMap = Object.fromEntries(list.map((w) => [w.id, w]))
     return {
-      wings: wings || [],
+      wings: list,
       units: (units || []).map((u) => ({ ...u, phone: canSeeContacts ? contacts[u.id] ?? u.phone ?? '' : '' })),
       loading: wings === null || units === null,
-      wingName: (id) => (id ? wingMap[id]?.name || t('unknownWing') : t('common')),
+      wingName: (id) => (id ? wingMap[id]?.label || t('unknownWing') : t('common')),
     }
   }, [wings, units, contacts, canSeeContacts])
 

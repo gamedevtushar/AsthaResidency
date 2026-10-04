@@ -38,6 +38,12 @@ export const periodLabel = (p, short = false) => {
   return new Date(y, m - 1, 1).toLocaleDateString(locale(), { month: short ? 'short' : 'long', year: short ? '2-digit' : 'numeric' })
 }
 
+/** "2026-10" → "October" / "ઑક્ટોબર" */
+export const monthName = (p) => {
+  const [y, m] = p.split('-').map(Number)
+  return new Date(y, m - 1, 1).toLocaleDateString(locale(), { month: 'long' })
+}
+
 export const shiftPeriod = (p, delta) => {
   const [y, m] = p.split('-').map(Number)
   const d = new Date(y, m - 1 + delta, 1)

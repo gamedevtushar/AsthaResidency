@@ -12,7 +12,7 @@ export function useWingPick() {
   const { profile } = useAuth()
   const { wings } = useData()
   const value = useSyncExternalStore((cb) => { listeners.add(cb); return () => listeners.delete(cb) }, () => picked)
-  const options = [...wings.map((w) => ({ value: w.id, label: w.name })), { value: 'common', label: t('common') }]
+  const options = [...wings.map((w) => ({ value: w.id, label: w.label })), { value: 'common', label: t('common') }]
   const fallback = profile?.role === 'wing_admin' && wings.some((w) => w.id === profile.wingId) ? profile.wingId : wings[0]?.id || 'common'
   const wing = options.some((o) => o.value === value) ? value : fallback
   return { wing, setWing: set, options, isCommon: wing === 'common', label: options.find((o) => o.value === wing)?.label || '' }

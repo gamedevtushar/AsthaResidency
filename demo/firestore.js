@@ -59,6 +59,9 @@ const upsert = (ref, data, merge) => {
 }
 const remove = (ref) => { DB[ref.name] = (DB[ref.name] || []).filter((r) => r.id !== ref.id) }
 
+export async function getDoc(ref) { await delay(200); return run(ref) }
+export const count = () => ({})
+export async function getCountFromServer(target) { await delay(200); return { data: () => ({ count: run(target).docs.length }) } }
 export async function setDoc(ref, data) { await delay(250); upsert(ref, data, false); notify() }
 export async function updateDoc(ref, data) {
   await delay(250)

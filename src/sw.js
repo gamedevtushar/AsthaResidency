@@ -18,9 +18,34 @@ self.addEventListener('activate', (event) => {
   })())
 })
 
-// The page asks us to take over after the user taps "Update"
+// The page asks us to take over after the user taps "Update", and tells us the colour theme (for the notification icon)
+const PREFS = 'astha-prefs'
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting()
+  if (event.data?.type === 'palette') caches.open(PREFS).then((c) => c.put('palette', new Response(event.data.id)))
+})
+
+// Maintenance reminder from the hourly sender: { title, body, link }
+self.addEventListener('push', (event) => {
+  event.waitUntil((async () => {
+    let d = {}
+    try { d = event.data?.json() || {} } catch { d = { body: event.data?.text() || '' } }
+    const palette = await (await caches.open(PREFS)).match('palette').then((r) => r?.text()).catch(() => null)
+    await self.registration.showNotification(d.title || 'આસ્થા રેસિડેન્સી', {
+      body: d.body || '', icon: `${BASE}icons/${palette || 'saffron'}-192.png`, badge: `${BASE}icons/${palette || 'saffron'}-192.png`,
+      tag: 'maintenance-reminder', renotify: true, data: { link: d.link || BASE },
+    })
+  })())
+})
+
+// Tapping the notification opens (or focuses) the app
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  event.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+    const open = wins.find((w) => new URL(w.url).pathname.startsWith(BASE))
+    return open ? open.focus() : self.clients.openWindow(event.notification.data?.link || BASE)
+  })())
 })
 
 const save = (req, res) => {

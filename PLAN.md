@@ -33,6 +33,14 @@ The Main Admin then creates every other user (username, password, role, wing) fr
 ## Look & language
 Light, Dark or Auto theme and Gujarati / English, switchable from the menu (remembered on each device).
 
+## Maintenance reminders
+Push notifications on the phones where the app is installed and reminders are turned on (Menu → મેન્ટેનન્સ રિમાઇન્ડર).
+Default: 1st and 2nd of every month at 10 AM and 7 PM (India time), Gujarati message. Main Admin changes days, times and messages in Menu → રિમાઇન્ડર સેટિંગ.
+The sender runs on GitHub every hour (`.github/workflows/reminders.yml` → `scripts/send-reminders.mjs`). One-time setup, two repository secrets:
+1. `FIREBASE_SERVICE_ACCOUNT`: Firebase Console → Project settings → Service accounts → Generate new private key → paste the whole JSON
+2. `VAPID_PRIVATE_KEY`: the value of VAPID_PRIVATE_KEY from your local .env
+Test: GitHub → Actions → Maintenance reminders → Run workflow → tick "send now".
+
 ## Colour themes
 Menu → **રંગ થીમ**: 10 ready-made themes (saffron, indigo, ocean, peacock, forest, violet, rose, gold, berry, graphite), each with light and dark mode. The logo, browser icon and app icon follow the theme. Themes live in `src/palettes.js`; after changing them run `node scripts/make-icons.mjs` to redraw the icons.
 

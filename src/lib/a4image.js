@@ -1,5 +1,5 @@
 import { t, tv } from '../i18n'
-import { inr, periodLabel, shortDate } from './format'
+import { inr, monthName, periodLabel, shortDate } from './format'
 
 /**
  * Printable A4 pictures (2480 × 3508 px = A4 at 300 dpi) on a white background,
@@ -244,7 +244,7 @@ export async function yearImage({ wingName, year, opening, rows, totIn, totOut }
     y += rowH
   }
   line(t('r.broughtForward'), null, null, inr(opening), false, '#fff7ed')
-  rows.forEach((r) => (r.future ? line(periodLabel(r.p), null, null, '—') : line(periodLabel(r.p), inr(r.inn), inr(r.out), inr(r.balance))))
+  rows.forEach((r) => (r.future ? line(monthName(r.p), null, null, '—') : line(monthName(r.p), inr(r.inn), inr(r.out), inr(r.balance))))
   line(t('r.total'), inr(totIn), inr(totOut), inr(closing), true, '#f5f5f4')
 
   footer(ctx)

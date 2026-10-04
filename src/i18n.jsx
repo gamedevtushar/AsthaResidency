@@ -65,7 +65,15 @@ const en = {
   'pwa.iconNote': 'Added it before and still see the old logo? Remove the old icon from your home screen and add it again.',
   'setup.title': 'App not connected yet', 'setup.text': 'The Firebase settings are missing. Add the FIREBASE_CONFIG secret on GitHub and deploy again (see README).',
   'role.public': 'Visitor · view only', 'public.viewing': 'You are viewing only', 'public.login': 'Admin login',
-  menu: 'Menu', theme: 'Theme', textSize: 'Text size', palette: 'Colour theme', feedback: 'Sound & vibration', add: 'Add', 'login.back': 'View without login',
+  menu: 'Menu', theme: 'Theme', textSize: 'Text size', palette: 'Colour theme', feedback: 'Vibration on tap',
+  'rem.title': 'Maintenance reminders', 'rem.ask': 'Get a reminder on this phone when maintenance is due?', 'rem.turnOn': 'Turn on', 'rem.on': 'Reminders are on',
+  'rem.state.default': 'Get a reminder on this phone', 'rem.state.granted': 'On for this phone',
+  'rem.state.denied': 'Blocked — allow notifications in phone settings', 'rem.state.install': 'Install the app to get reminders',
+  'rem.settings': 'Reminder settings', 'rem.sub': 'Monthly maintenance reminders',
+  'rem.note': 'Sent only to phones where the app is installed and reminders are on. Times are India time.',
+  'rem.phones': '{n} phones will get them', 'rem.enabled': 'Send reminders', 'rem.days': 'Days of the month',
+  'rem.messages': 'Time and message', 'rem.preview': 'Preview', 'rem.addTime': 'Add another time',
+  'rem.titlePh': 'Title', 'rem.bodyPh': 'Message', add: 'Add', 'login.back': 'View without login',
   'u.tapToRemove': 'Tap a unit to remove it (tap again to bring it back). Add extra numbers below.',
   'u.addExtraPh': 'Extra unit, e.g. A-105', 'u.maintUsualHint': 'Usual amount. You can change it any month with "Monthly amount" in Monthly accounts.',
   'u.phoneHint': 'Only visible to logged-in admins',
@@ -194,7 +202,15 @@ const gu = {
   'pwa.iconNote': 'પહેલાં ઉમેરેલું હોય અને જૂનો લોગો દેખાય? હોમ સ્ક્રીન પરથી જૂનો આઇકન કાઢી ફરી ઉમેરો.',
   'setup.title': 'એપ હજુ જોડાયેલી નથી', 'setup.text': 'Firebase સેટિંગ્સ નથી. GitHub માં FIREBASE_CONFIG secret ઉમેરી ફરી deploy કરો (README જુઓ).',
   'role.public': 'મુલાકાતી · ફક્ત જોવા', 'public.viewing': 'તમે ફક્ત જોઈ રહ્યા છો', 'public.login': 'એડમિન લૉગિન',
-  menu: 'મેનુ', theme: 'થીમ', textSize: 'અક્ષરનું કદ', palette: 'રંગ થીમ', feedback: 'અવાજ અને વાઇબ્રેશન', add: 'ઉમેરો', 'login.back': 'લૉગિન વગર જુઓ',
+  menu: 'મેનુ', theme: 'થીમ', textSize: 'અક્ષરનું કદ', palette: 'રંગ થીમ', feedback: 'ટૅપ પર વાઇબ્રેશન',
+  'rem.title': 'મેન્ટેનન્સ રિમાઇન્ડર', 'rem.ask': 'મેન્ટેનન્સ ભરવાનો સમય થાય ત્યારે આ ફોન પર યાદ અપાવીએ?', 'rem.turnOn': 'ચાલુ કરો', 'rem.on': 'રિમાઇન્ડર ચાલુ થયા',
+  'rem.state.default': 'આ ફોન પર યાદ અપાવવા', 'rem.state.granted': 'આ ફોન પર ચાલુ છે',
+  'rem.state.denied': 'બંધ છે — ફોનના સેટિંગમાં નોટિફિકેશનની મંજૂરી આપો', 'rem.state.install': 'રિમાઇન્ડર માટે એપ ઇન્સ્ટોલ કરો',
+  'rem.settings': 'રિમાઇન્ડર સેટિંગ', 'rem.sub': 'દર મહિને મેન્ટેનન્સની યાદ',
+  'rem.note': 'ફક્ત એપ ઇન્સ્ટોલ કરેલા અને રિમાઇન્ડર ચાલુ કરેલા ફોન પર જ મોકલાશે. સમય ભારતીય સમય મુજબ.',
+  'rem.phones': '{n} ફોન પર મોકલાશે', 'rem.enabled': 'રિમાઇન્ડર મોકલો', 'rem.days': 'મહિનાની તારીખો',
+  'rem.messages': 'સમય અને સંદેશ', 'rem.preview': 'જુઓ', 'rem.addTime': 'બીજો સમય ઉમેરો',
+  'rem.titlePh': 'શીર્ષક', 'rem.bodyPh': 'સંદેશ', add: 'ઉમેરો', 'login.back': 'લૉગિન વગર જુઓ',
   'u.tapToRemove': 'યુનિટ દૂર કરવા તેના પર ટૅપ કરો (ફરી ટૅપ કરવાથી પાછું આવશે). વધારાના નંબર નીચે ઉમેરો.',
   'u.addExtraPh': 'વધારાનું યુનિટ, દા.ત. A-105', 'u.maintUsualHint': 'સામાન્ય રકમ. "માસિક હિસાબ" માં "મહિનાની રકમ" થી કોઈ પણ મહિને બદલી શકાય.',
   'u.phoneHint': 'ફક્ત લૉગિન થયેલા એડમિન જ જોઈ શકે',
@@ -281,6 +297,12 @@ export function t(key, vars) {
   let s = DICTS[current][key] ?? en[key] ?? key
   if (vars) for (const k in vars) s = s.replaceAll(`{${k}}`, vars[k])
   return s
+}
+
+/** Wing name with the wing word in the current language: "A Wing", "A" or "Wing A" → "A Wing" / "A વિંગ" */
+export function wingTitle(name) {
+  const base = String(name || '').replace(/^\s*(wing|વિંગ)\s+/i, '').replace(/\s+(wing|વિંગ)\s*$/i, '').trim()
+  return base ? `${base} ${t('wing')}` : t('wing')
 }
 
 /** Translate a value stored in English in the database (category, payment mode) */

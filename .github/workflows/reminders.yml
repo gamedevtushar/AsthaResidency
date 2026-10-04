@@ -1,0 +1,41 @@
+# Sends the monthly maintenance reminders. Runs every hour; scripts/send-reminders.mjs decides whether
+# this hour is a reminder time (days, times and messages are set in the app: Menu → Reminder settings).
+# "Run workflow" with "send now" ticked sends the first message immediately, as a test.
+name: Maintenance reminders
+
+on:
+  schedule:
+    - cron: '5 * * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Send the first reminder message now (test)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reminders
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Send reminders
+        run: node scripts/send-reminders.mjs
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          APP_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          FORCE: ${{ inputs.force && '1' || '' }}
